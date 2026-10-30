@@ -1,0 +1,125 @@
+{
+  "research_question": "Analyze vegetation health using NDVI for the agricultural region near Hyderabad, India for October 2024",
+  "domain": "earth_observation",
+  "subdomain": "vegetation_analysis",
+  "status": "completed_with_limitations",
+  "summary": "NDVI analysis performed using algorithmic computation on available spectral band data. Results indicate moderate vegetation health across the study area with spatial variation consistent with mixed agricultural and urban land use.",
+  "findings": [
+    {
+      "type": "statistical_summary",
+      "description": "NDVI statistics for the study area",
+      "values": {
+        "mean": 0.42,
+        "std": 0.18,
+        "min": -0.05,
+        "max": 0.82,
+        "median": 0.44
+      },
+      "unit": "dimensionless (NDVI ratio)",
+      "interpretation": "Values above 0.3 indicate healthy vegetation. Mean of 0.42 suggests moderate vegetation cover."
+    },
+    {
+      "type": "classification",
+      "description": "NDVI-based land cover distribution",
+      "values": {
+        "water_or_bare (< 0.1)": "12%",
+        "sparse_vegetation (0.1-0.3)": "23%",
+        "moderate_vegetation (0.3-0.6)": "41%",
+        "dense_vegetation (> 0.6)": "24%"
+      }
+    }
+  ],
+  "measurements": [
+    {"name": "mean_ndvi", "value": 0.42, "unit": "dimensionless", "precision": 0.01},
+    {"name": "area_analyzed_km2", "value": 2500.0, "unit": "km²", "crs": "EPSG:32644"},
+    {"name": "pixel_count", "value": 250000, "unit": "pixels"},
+    {"name": "spatial_resolution", "value": 10.0, "unit": "meters"}
+  ],
+  "artifacts": [
+    {
+      "type": "plot",
+      "format": "PNG",
+      "filename": "ndvi_distribution.png",
+      "description": "Histogram of NDVI values across study area"
+    },
+    {
+      "type": "geotiff",
+      "format": "GeoTIFF",
+      "filename": "ndvi_map.tif",
+      "description": "Computed NDVI raster map",
+      "crs": "EPSG:32644",
+      "bounds": [78.2, 17.2, 78.7, 17.7]
+    }
+  ],
+  "visualization_data": {
+    "ndvi_histogram": {
+      "type": "histogram",
+      "bins": [-0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+      "counts": [500, 2500, 8000, 22000, 45000, 62000, 55000, 35000, 15000, 5000]
+    }
+  },
+  "methodology": [
+    "NDVI computed as (NIR - Red) / (NIR + Red) using Band 8 (NIR) and Band 4 (Red)",
+    "Nodata pixels excluded from statistics",
+    "Area computed using equal-area projection (UTM Zone 44N)",
+    "Classification thresholds based on standard NDVI interpretation guidelines"
+  ],
+  "data_sources": [
+    {
+      "name": "Sentinel-2 L2A",
+      "provider": "Copernicus Data Space",
+      "product_id": "S2A_MSIL2A_20241015T050701_N0511_R019_T44QMK",
+      "acquisition_date": "2024-10-15",
+      "spatial_resolution_m": 10,
+      "bands_used": ["B04", "B08"],
+      "cloud_cover_pct": 5.2
+    }
+  ],
+  "models_used": [],
+  "validation": {
+    "method": "range_check",
+    "ndvi_range_valid": true,
+    "expected_range": [-1.0, 1.0],
+    "observed_range": [-0.05, 0.82],
+    "nodata_percentage": 2.1,
+    "quality_flags_checked": true
+  },
+  "uncertainty": {
+    "atmospheric_correction": "L2A product includes atmospheric correction by Sen2Cor",
+    "geometric_accuracy_m": 12.5,
+    "radiometric_uncertainty": "Not quantified for this analysis",
+    "spatial_representativeness": "10m resolution suitable for field-level analysis"
+  },
+  "limitations": [
+    "Single-date analysis - does not capture temporal vegetation dynamics",
+    "NDVI alone cannot distinguish crop types",
+    "Cloud and shadow masking uses SCL band but residual contamination possible",
+    "No ground-truth validation performed"
+  ],
+  "provenance": {
+    "engine": "ICARUS v0.1.0",
+    "engine_version": "0.1.0",
+    "timestamp": "2026-10-30T12:00:00Z",
+    "execution_time_seconds": 45.2,
+    "environment": "kaggle_gpu_t4",
+    "python_version": "3.11",
+    "numpy_version": "1.24.0",
+    "reproducible": true,
+    "random_seed": null,
+    "pipeline_steps": [
+      "domain_identification",
+      "capability_selection",
+      "data_retrieval",
+      "data_profiling",
+      "ndvi_computation",
+      "statistical_analysis",
+      "classification",
+      "visualization",
+      "report_generation"
+    ]
+  },
+  "warnings": [
+    "This is a SAMPLE result demonstrating the output structure",
+    "Actual execution requires satellite imagery data access"
+  ]
+}

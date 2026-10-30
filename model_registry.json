@@ -1,0 +1,443 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-10-30",
+  "models": [
+    {
+      "id": "prithvi-eo-2.0-300m",
+      "name": "Prithvi-EO-2.0-300M",
+      "description": "IBM/NASA Prithvi Earth Observation 2.0 foundation model (300M parameters). Pre-trained on Harmonized Landsat Sentinel-2 (HLS) multi-band satellite imagery for general-purpose geospatial feature extraction and downstream Earth observation tasks.",
+      "source_url": "https://huggingface.co/ibm-nasa-geospatial/Prithvi-EO-2.0-300M",
+      "type": "foundation_model",
+      "domain": "earth_observation",
+      "tasks": [
+        "feature_extraction",
+        "land_cover_classification",
+        "change_detection",
+        "segmentation"
+      ],
+      "framework": "pytorch",
+      "license": "Apache-2.0",
+      "input_format": "tensor",
+      "input_description": "Multi-band satellite imagery (HLS), 6 spectral bands, 224x224 pixel patches",
+      "output_format": "tensor",
+      "gpu_memory_mb": 2048,
+      "cpu_capable": false,
+      "dependencies": [
+        "torch",
+        "timm",
+        "rasterio",
+        "numpy"
+      ],
+      "status": "available",
+      "known_limitations": [
+        "Requires 224x224 input patches — larger images must be tiled",
+        "Pre-trained on HLS data only — performance may degrade on other sensor types",
+        "Requires fine-tuning for specific downstream tasks"
+      ],
+      "notes": "Base foundation model. Use task-specific fine-tuned variants (floods, burn scars) for production applications."
+    },
+    {
+      "id": "prithvi-eo-2.0-300m-floods",
+      "name": "Prithvi-EO-2.0-300M-TL-Sen1Floods11",
+      "description": "Fine-tuned variant of Prithvi-EO-2.0-300M for flood mapping using Sentinel-1/2 imagery. Transfer-learned on the Sen1Floods11 benchmark dataset for binary flood segmentation.",
+      "source_url": "https://huggingface.co/ibm-nasa-geospatial/Prithvi-EO-2.0-300M-TL-Sen1Floods11",
+      "type": "fine_tuned",
+      "domain": "earth_observation",
+      "tasks": [
+        "flood_mapping",
+        "flood_segmentation"
+      ],
+      "framework": "pytorch",
+      "license": "Apache-2.0",
+      "input_format": "tensor",
+      "input_description": "Sentinel-1 SAR and Sentinel-2 optical imagery",
+      "output_format": "segmentation_mask",
+      "gpu_memory_mb": 2048,
+      "cpu_capable": false,
+      "dependencies": [
+        "torch",
+        "timm",
+        "rasterio",
+        "numpy"
+      ],
+      "status": "available",
+      "known_limitations": [
+        "Trained on Sen1Floods11 — may not generalize to all flood scenarios",
+        "Binary segmentation only (flood vs. non-flood)",
+        "Performance depends on cloud-free imagery availability"
+      ],
+      "notes": "Use this model specifically for flood mapping tasks. Do not use the base Prithvi model for flood detection without fine-tuning."
+    },
+    {
+      "id": "prithvi-eo-2.0-300m-burnscars",
+      "name": "Prithvi-EO-2.0-300M-BurnScars",
+      "description": "Fine-tuned variant of Prithvi-EO-2.0-300M for burn scar detection from satellite imagery. Identifies post-wildfire burned areas through semantic segmentation.",
+      "source_url": "https://huggingface.co/ibm-nasa-geospatial/Prithvi-EO-2.0-300M-BurnScars",
+      "type": "fine_tuned",
+      "domain": "earth_observation",
+      "tasks": [
+        "burn_scar_detection",
+        "fire_damage_assessment"
+      ],
+      "framework": "pytorch",
+      "license": "Apache-2.0",
+      "input_format": "tensor",
+      "input_description": "Multi-band satellite imagery (HLS) with shortwave infrared bands",
+      "output_format": "segmentation_mask",
+      "gpu_memory_mb": 2048,
+      "cpu_capable": false,
+      "dependencies": [
+        "torch",
+        "timm",
+        "rasterio",
+        "numpy"
+      ],
+      "status": "available",
+      "known_limitations": [
+        "Detects post-fire burn scars only — not active fire detection",
+        "Requires cloud-free post-fire imagery",
+        "May confuse burn scars with dark soil or shadows in some terrain"
+      ],
+      "notes": "Designed for post-wildfire damage assessment. For active fire detection, use thermal band analysis algorithms instead."
+    },
+    {
+      "id": "microsoft-aurora",
+      "name": "Microsoft Aurora",
+      "description": "Microsoft Aurora foundation model for weather and climate prediction. Large-scale atmospheric model capable of high-resolution weather forecasting using AI, trained on ERA5 reanalysis and other atmospheric datasets.",
+      "source_url": "https://github.com/microsoft/aurora",
+      "type": "foundation_model",
+      "domain": "atmosphere",
+      "tasks": [
+        "weather_forecasting",
+        "atmospheric_prediction",
+        "climate_simulation"
+      ],
+      "framework": "pytorch",
+      "license": "MIT",
+      "input_format": "tensor",
+      "input_description": "Atmospheric state variables (temperature, pressure, humidity, wind) on pressure levels, surface variables",
+      "output_format": "tensor",
+      "gpu_memory_mb": 8192,
+      "cpu_capable": false,
+      "dependencies": [
+        "torch",
+        "microsoft-aurora",
+        "numpy",
+        "xarray"
+      ],
+      "status": "available",
+      "known_limitations": [
+        "Large model requiring significant GPU memory (8+ GB)",
+        "Forecast skill degrades beyond 10-day lead times",
+        "May not capture sub-grid-scale phenomena accurately",
+        "Requires ERA5-compatible input formatting"
+      ],
+      "notes": "Large model, requires significant GPU memory. Use for weather forecasting tasks only — do not confuse with Aurora Wave for ocean applications."
+    },
+    {
+      "id": "aurora-wave",
+      "name": "Aurora Wave",
+      "description": "Aurora Wave model for ocean wave forecasting. Specialized variant of the Aurora framework designed for predicting ocean wave conditions including significant wave height, period, and direction.",
+      "source_url": "https://github.com/microsoft/aurora",
+      "type": "specialized",
+      "domain": "oceans",
+      "tasks": [
+        "wave_forecasting",
+        "wave_height_prediction",
+        "ocean_state_estimation"
+      ],
+      "framework": "pytorch",
+      "license": "MIT",
+      "input_format": "tensor",
+      "input_description": "Ocean surface state variables, wind fields, wave spectra",
+      "output_format": "tensor",
+      "gpu_memory_mb": 4096,
+      "cpu_capable": false,
+      "dependencies": [
+        "torch",
+        "microsoft-aurora",
+        "numpy",
+        "xarray"
+      ],
+      "status": "available",
+      "known_limitations": [
+        "Specialized for wave forecasting — not a general ocean model",
+        "Performance may vary in coastal and shallow water regions",
+        "Requires wind forcing fields as input"
+      ],
+      "notes": "Different application from base Aurora — do not interchange. Use this for ocean wave tasks and base Aurora for atmospheric tasks."
+    },
+    {
+      "id": "prithvi-wxc",
+      "name": "Prithvi Weather-Climate (WxC)",
+      "description": "NASA/IBM Prithvi Weather-Climate foundation model. A large-scale AI model for weather and climate applications, pre-trained on MERRA-2 reanalysis data for downstream weather prediction and climate analysis tasks.",
+      "source_url": "https://github.com/NASA-IMPACT/Prithvi-WxC",
+      "type": "foundation_model",
+      "domain": "climate",
+      "tasks": [
+        "weather_prediction",
+        "climate_downscaling",
+        "climate_projection",
+        "extreme_event_prediction"
+      ],
+      "framework": "pytorch",
+      "license": "Apache-2.0",
+      "input_format": "tensor",
+      "input_description": "Atmospheric state variables from reanalysis (MERRA-2 format), multi-level pressure and surface fields",
+      "output_format": "tensor",
+      "gpu_memory_mb": 4096,
+      "cpu_capable": false,
+      "dependencies": [
+        "torch",
+        "numpy",
+        "xarray",
+        "netCDF4"
+      ],
+      "status": "available",
+      "known_limitations": [
+        "Pre-trained on MERRA-2 — may not generalize to other reanalysis formats without adaptation",
+        "Requires fine-tuning for specific downstream tasks",
+        "Computationally expensive for full-resolution inference"
+      ],
+      "notes": "NASA/IBM collaborative foundation model. Complementary to Microsoft Aurora — Prithvi-WxC focuses on longer-range climate applications."
+    },
+    {
+      "id": "seisbench",
+      "name": "SeisBench",
+      "description": "SeisBench is a comprehensive seismological machine learning benchmark framework providing standardized interfaces for seismic data, pre-trained models (PhaseNet, EQTransformer, etc.), and benchmark datasets for earthquake detection and phase picking.",
+      "source_url": "https://github.com/seisbench/seisbench",
+      "type": "framework",
+      "domain": "solid_earth",
+      "tasks": [
+        "seismic_analysis",
+        "phase_picking",
+        "earthquake_detection",
+        "magnitude_estimation"
+      ],
+      "framework": "pytorch",
+      "license": "GPL-3.0",
+      "input_format": "waveform",
+      "input_description": "Seismic waveform data in standard formats (MiniSEED, SAC) via ObsPy",
+      "output_format": "predictions",
+      "gpu_memory_mb": 1024,
+      "cpu_capable": true,
+      "dependencies": [
+        "torch",
+        "obspy",
+        "seisbench",
+        "numpy"
+      ],
+      "status": "available",
+      "known_limitations": [
+        "Framework — not a model itself; provides access to multiple models",
+        "Model performance varies by region and network configuration",
+        "Requires ObsPy for seismic data handling"
+      ],
+      "notes": "Meta-framework for seismological ML. Use specific models (PhaseNet, EQTransformer) through this interface."
+    },
+    {
+      "id": "phasenet",
+      "name": "PhaseNet",
+      "description": "PhaseNet is a deep neural network for seismic phase picking. It identifies P-wave and S-wave arrival times in continuous seismic waveforms with high precision, accessible through the SeisBench framework.",
+      "source_url": "https://github.com/seisbench/seisbench",
+      "type": "specialized",
+      "domain": "solid_earth",
+      "tasks": [
+        "phase_picking",
+        "p_wave_detection",
+        "s_wave_detection"
+      ],
+      "framework": "pytorch",
+      "license": "GPL-3.0",
+      "input_format": "waveform",
+      "input_description": "Three-component (ZNE or Z12) seismic waveform data, typically 30-second windows at 100 Hz",
+      "output_format": "phase_picks",
+      "gpu_memory_mb": 512,
+      "cpu_capable": true,
+      "dependencies": [
+        "torch",
+        "seisbench",
+        "obspy",
+        "numpy"
+      ],
+      "status": "available",
+      "known_limitations": [
+        "Optimized for local/regional earthquakes — may miss teleseismic phases",
+        "Performance depends on signal-to-noise ratio",
+        "Trained primarily on broadband station data"
+      ],
+      "notes": "Accessed through SeisBench framework. One of the most widely used seismic phase pickers in modern seismology."
+    },
+    {
+      "id": "eqtransformer",
+      "name": "EQTransformer",
+      "description": "EQTransformer is a multi-task deep learning model for simultaneous earthquake detection, P-wave picking, and S-wave picking. Uses attention mechanisms to process continuous seismic waveforms, accessible through SeisBench.",
+      "source_url": "https://github.com/seisbench/seisbench",
+      "type": "specialized",
+      "domain": "solid_earth",
+      "tasks": [
+        "earthquake_detection",
+        "phase_picking",
+        "event_classification"
+      ],
+      "framework": "pytorch",
+      "license": "GPL-3.0",
+      "input_format": "waveform",
+      "input_description": "Three-component seismic waveform data, 60-second windows at 100 Hz",
+      "output_format": "detections_and_picks",
+      "gpu_memory_mb": 512,
+      "cpu_capable": true,
+      "dependencies": [
+        "torch",
+        "seisbench",
+        "obspy",
+        "numpy"
+      ],
+      "status": "available",
+      "known_limitations": [
+        "May produce false positives in high-noise environments",
+        "Trained on STEAD dataset — performance varies by region",
+        "Slower inference than PhaseNet due to attention layers"
+      ],
+      "notes": "Multi-task model providing both detection and picking. Use PhaseNet for phase picking only; use EQTransformer when both detection and picking are needed."
+    },
+    {
+      "id": "surya",
+      "name": "Surya Solar Foundation Model",
+      "description": "NASA/IBM Surya is a foundation model for solar physics and heliophysics. Pre-trained on Solar Dynamics Observatory (SDO) imagery across multiple wavelengths for solar feature recognition and space weather applications.",
+      "source_url": "https://github.com/NASA-IMPACT/Surya",
+      "type": "foundation_model",
+      "domain": "heliophysics",
+      "tasks": [
+        "solar_feature_extraction",
+        "sunspot_detection",
+        "active_region_classification",
+        "solar_event_prediction"
+      ],
+      "framework": "pytorch",
+      "license": "Apache-2.0",
+      "input_format": "image",
+      "input_description": "Solar Dynamics Observatory (SDO) AIA and HMI imagery across multiple EUV/UV wavelengths",
+      "output_format": "features",
+      "gpu_memory_mb": 2048,
+      "cpu_capable": false,
+      "dependencies": [
+        "torch",
+        "sunpy",
+        "astropy",
+        "numpy"
+      ],
+      "status": "available",
+      "known_limitations": [
+        "Pre-trained on SDO data — may not generalize to other solar observatories without adaptation",
+        "Requires fine-tuning for specific downstream tasks",
+        "Solar imagery preprocessing (limb correction, normalization) required"
+      ],
+      "notes": "Foundation model for heliophysics. Requires SDO-format input imagery. Fine-tune for specific tasks like flare prediction or coronal hole detection."
+    },
+    {
+      "id": "lunar-crater-detection",
+      "name": "NASA/IBM Lunar Foundation Model — Crater Detection",
+      "description": "Fine-tuned crater detection model from the NASA/IBM Lunar Foundation Model. Identifies and segments impact craters on the lunar surface from orbital imagery.",
+      "source_url": "https://huggingface.co/nasa-ibm-ai4science/Crater-Detection-NASA-IBM-Lunar-Foundation-Model",
+      "type": "fine_tuned",
+      "domain": "planetary",
+      "tasks": [
+        "crater_detection",
+        "crater_segmentation",
+        "surface_feature_identification"
+      ],
+      "framework": "pytorch",
+      "license": "Apache-2.0",
+      "input_format": "image",
+      "input_description": "Lunar orbital imagery (e.g., LROC NAC/WAC), grayscale or multi-band",
+      "output_format": "segmentation_mask",
+      "gpu_memory_mb": 2048,
+      "cpu_capable": false,
+      "dependencies": [
+        "torch",
+        "torchvision",
+        "numpy",
+        "rasterio"
+      ],
+      "status": "available",
+      "known_limitations": [
+        "Trained on lunar imagery ONLY — do NOT use for Mars crater detection",
+        "Performance varies with illumination angle and image resolution",
+        "May miss heavily degraded or overlapping craters",
+        "Not validated for other planetary bodies"
+      ],
+      "notes": "Trained on lunar imagery ONLY. Do NOT use for Mars crater detection. A separate Mars-specific model would be required for Martian crater analysis."
+    },
+    {
+      "id": "zoobot-convnext-nano",
+      "name": "Zoobot ConvNeXt-Nano",
+      "description": "Zoobot galaxy morphology classifier using a ConvNeXt-Nano backbone. Pre-trained on Galaxy Zoo volunteer classifications for automated galaxy morphological analysis including spiral arm detection, bar identification, and merger classification.",
+      "source_url": "https://zoobot.readthedocs.io/en/latest/pretrained_models.html",
+      "type": "fine_tuned",
+      "domain": "astronomy",
+      "tasks": [
+        "galaxy_morphology",
+        "galaxy_classification",
+        "morphological_feature_detection"
+      ],
+      "framework": "pytorch",
+      "license": "GPL-3.0",
+      "input_format": "image",
+      "input_description": "Galaxy cutout images (RGB or single-band), typically 224x224 pixels from survey imaging",
+      "output_format": "classification_probabilities",
+      "gpu_memory_mb": 1024,
+      "cpu_capable": true,
+      "dependencies": [
+        "torch",
+        "zoobot",
+        "torchvision",
+        "numpy",
+        "astropy"
+      ],
+      "status": "available",
+      "known_limitations": [
+        "Trained on Galaxy Zoo data — biased toward bright, resolved galaxies",
+        "Classification scheme follows Galaxy Zoo decision tree",
+        "May not generalize to very high-redshift or faint galaxies",
+        "Nano variant trades accuracy for speed — use larger variants for research-grade results"
+      ],
+      "notes": "Lightweight variant suitable for rapid morphological screening. For detailed research, consider larger Zoobot variants."
+    },
+    {
+      "id": "astroclip",
+      "name": "AstroCLIP",
+      "description": "AstroCLIP is a multi-modal astronomy foundation model from the Polymathic AI initiative. It aligns galaxy images and spectra in a shared embedding space using contrastive learning, enabling cross-modal retrieval and zero-shot classification.",
+      "source_url": "https://github.com/PolymathicAI/AstroCLIP",
+      "type": "foundation_model",
+      "domain": "astronomy",
+      "tasks": [
+        "cross_modal_retrieval",
+        "galaxy_property_estimation",
+        "zero_shot_classification",
+        "embedding_generation"
+      ],
+      "framework": "pytorch",
+      "license": "MIT",
+      "input_format": "image_or_spectrum",
+      "input_description": "Galaxy images (multi-band survey cutouts) or optical spectra (flux vs. wavelength arrays)",
+      "output_format": "embeddings",
+      "gpu_memory_mb": 4096,
+      "cpu_capable": false,
+      "dependencies": [
+        "torch",
+        "astroclip",
+        "astropy",
+        "numpy"
+      ],
+      "status": "optional",
+      "known_limitations": [
+        "Expensive model — high GPU memory requirement",
+        "Trained on DESI Legacy Survey data — may not generalize to all surveys",
+        "Cross-modal alignment may degrade for rare or unusual objects",
+        "Requires specific input preprocessing pipeline"
+      ],
+      "notes": "Optional — expensive model, only load if explicitly requested. Powerful for cross-modal astronomy tasks but resource-intensive."
+    }
+  ]
+}

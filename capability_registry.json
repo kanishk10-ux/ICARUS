@@ -1,0 +1,1992 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-10-30",
+  "capabilities": [
+    {
+      "id": "eo_land_cover_classification",
+      "domain": "earth_observation",
+      "subdomain": "land_cover",
+      "name": "Land Cover Classification",
+      "description": "Classify land cover types (urban, forest, water, agriculture, barren, etc.) from multi-band satellite imagery using deep learning foundation models. Produces pixel-level classification maps.",
+      "status": "planned",
+      "required_inputs": [
+        "satellite_imagery"
+      ],
+      "supported_data_sources": [
+        "copernicus_dataspace",
+        "nasa_earthdata",
+        "usgs_landsat"
+      ],
+      "models": [
+        "prithvi-eo-2.0-300m"
+      ],
+      "algorithms": [],
+      "dependencies": [
+        "torch",
+        "rasterio",
+        "numpy"
+      ],
+      "resource_requirements": {
+        "gpu": true,
+        "min_memory_mb": 2048
+      },
+      "known_limitations": [
+        "Requires Prithvi foundation model fine-tuning for specific land cover schemes",
+        "Classification taxonomy must be defined per use case",
+        "Cloud cover in imagery reduces accuracy"
+      ],
+      "notes": "Planned — requires fine-tuning the Prithvi-EO base model on a land cover classification dataset.",
+      "verification_note": "Architecture and schemas defined; pending specialist model deployment."
+    },
+    {
+      "id": "eo_vegetation_analysis",
+      "domain": "earth_observation",
+      "subdomain": "vegetation",
+      "name": "Vegetation Analysis",
+      "description": "Analyze vegetation health, coverage, and dynamics using spectral indices (NDVI, NDWI, EVI, SAVI) computed from multi-band satellite imagery. Supports temporal change analysis.",
+      "status": "implemented",
+      "required_inputs": [
+        "satellite_imagery"
+      ],
+      "supported_data_sources": [
+        "copernicus_dataspace",
+        "nasa_earthdata",
+        "usgs_landsat"
+      ],
+      "models": [],
+      "algorithms": [
+        "ndvi_analysis",
+        "ndwi_analysis",
+        "evi_computation",
+        "savi_computation"
+      ],
+      "dependencies": [
+        "rasterio",
+        "numpy",
+        "xarray"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 512
+      },
+      "known_limitations": [
+        "Index-based analysis only — no deep learning classification",
+        "NDVI saturation in dense canopy areas",
+        "Cloud and shadow contamination affect accuracy",
+        "Atmospheric correction recommended for quantitative analysis"
+      ],
+      "notes": "Algorithm-based implementation using standard spectral vegetation indices. No GPU or ML model required.",
+      "verification_note": "Mathematically verified algorithm implemented and tested."
+    },
+    {
+      "id": "eo_flood_mapping",
+      "domain": "earth_observation",
+      "subdomain": "disaster",
+      "name": "Flood Mapping",
+      "description": "Map flood extent from satellite imagery using the Prithvi-EO-2.0-300M model fine-tuned on the Sen1Floods11 dataset. Produces binary flood segmentation masks.",
+      "status": "planned",
+      "required_inputs": [
+        "satellite_imagery",
+        "sentinel1_sar",
+        "sentinel2_optical"
+      ],
+      "supported_data_sources": [
+        "copernicus_dataspace",
+        "nasa_earthdata"
+      ],
+      "models": [
+        "prithvi-eo-2.0-300m-floods"
+      ],
+      "algorithms": [
+        "water_index_thresholding"
+      ],
+      "dependencies": [
+        "torch",
+        "rasterio",
+        "numpy"
+      ],
+      "resource_requirements": {
+        "gpu": true,
+        "min_memory_mb": 2048
+      },
+      "known_limitations": [
+        "Requires Prithvi flood model to be downloaded and loaded",
+        "Binary classification only (flood vs. non-flood)",
+        "Cloud cover may obscure flood extent in optical imagery",
+        "SAR-based mapping not affected by clouds but has speckle noise"
+      ],
+      "notes": "Planned — needs Prithvi flood model integration. Fallback to NDWI-based water detection is available as a simpler alternative.",
+      "verification_note": "Architecture and schemas defined; pending specialist model deployment."
+    },
+    {
+      "id": "eo_burn_scar_detection",
+      "domain": "earth_observation",
+      "subdomain": "disaster",
+      "name": "Burn Scar Detection",
+      "description": "Detect and map wildfire burn scars from satellite imagery using the Prithvi-EO-2.0-300M BurnScars model. Identifies post-fire damaged areas through semantic segmentation.",
+      "status": "planned",
+      "required_inputs": [
+        "satellite_imagery"
+      ],
+      "supported_data_sources": [
+        "copernicus_dataspace",
+        "nasa_earthdata"
+      ],
+      "models": [
+        "prithvi-eo-2.0-300m-burnscars"
+      ],
+      "algorithms": [
+        "nbr_analysis"
+      ],
+      "dependencies": [
+        "torch",
+        "rasterio",
+        "numpy"
+      ],
+      "resource_requirements": {
+        "gpu": true,
+        "min_memory_mb": 2048
+      },
+      "known_limitations": [
+        "Detects post-fire burn scars only — not active fires",
+        "Requires cloud-free post-fire imagery",
+        "May confuse dark soil or recent plowing with burn scars"
+      ],
+      "notes": "Planned — needs Prithvi burn scar model integration. NBR (Normalized Burn Ratio) algorithm available as a fallback.",
+      "verification_note": "Architecture and schemas defined; pending specialist model deployment."
+    },
+    {
+      "id": "eo_deforestation_detection",
+      "domain": "earth_observation",
+      "subdomain": "land_cover",
+      "name": "Deforestation Detection",
+      "description": "Detect deforestation and forest degradation through multi-temporal satellite image analysis. Identifies areas of forest loss by comparing vegetation indices and land cover over time.",
+      "status": "planned",
+      "required_inputs": [
+        "satellite_imagery",
+        "temporal_image_series"
+      ],
+      "supported_data_sources": [
+        "copernicus_dataspace",
+        "nasa_earthdata",
+        "usgs_landsat"
+      ],
+      "models": [
+        "prithvi-eo-2.0-300m"
+      ],
+      "algorithms": [
+        "ndvi_change_detection",
+        "multi_temporal_comparison"
+      ],
+      "dependencies": [
+        "torch",
+        "rasterio",
+        "numpy",
+        "xarray"
+      ],
+      "resource_requirements": {
+        "gpu": true,
+        "min_memory_mb": 2048
+      },
+      "known_limitations": [
+        "Requires multi-temporal imagery for change detection",
+        "Seasonal vegetation changes may cause false positives",
+        "Cloud cover limits temporal resolution in tropical regions"
+      ],
+      "notes": "Planned — will combine NDVI temporal analysis with Prithvi model-based segmentation for robust deforestation mapping.",
+      "verification_note": "Architecture and schemas defined; pending specialist model deployment."
+    },
+    {
+      "id": "eo_change_detection",
+      "domain": "earth_observation",
+      "subdomain": "monitoring",
+      "name": "Change Detection",
+      "description": "Detect and quantify surface changes between satellite images acquired at different times. Uses image differencing, ratio analysis, and spectral change vector analysis.",
+      "status": "implemented",
+      "required_inputs": [
+        "satellite_imagery",
+        "temporal_image_pair"
+      ],
+      "supported_data_sources": [
+        "copernicus_dataspace",
+        "nasa_earthdata",
+        "usgs_landsat"
+      ],
+      "models": [],
+      "algorithms": [
+        "image_differencing",
+        "change_vector_analysis",
+        "spectral_ratio_analysis"
+      ],
+      "dependencies": [
+        "rasterio",
+        "numpy",
+        "scikit-image"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 1024
+      },
+      "known_limitations": [
+        "Algorithm-based — no semantic understanding of change type",
+        "Sensitive to radiometric differences between acquisitions",
+        "Co-registration accuracy affects results",
+        "Does not classify the type of change — only detects where change occurred"
+      ],
+      "notes": "Algorithm-based implementation. Detects that change occurred but does not classify the nature of the change.",
+      "verification_note": "Mathematically verified algorithm implemented and tested."
+    },
+    {
+      "id": "eo_biomass_analysis",
+      "domain": "earth_observation",
+      "subdomain": "vegetation",
+      "name": "Biomass Analysis",
+      "description": "Estimate above-ground biomass and carbon stocks from satellite imagery using vegetation indices and allometric models. Supports forest carbon monitoring applications.",
+      "status": "planned",
+      "required_inputs": [
+        "satellite_imagery",
+        "lidar_data"
+      ],
+      "supported_data_sources": [
+        "copernicus_dataspace",
+        "nasa_earthdata"
+      ],
+      "models": [
+        "prithvi-eo-2.0-300m"
+      ],
+      "algorithms": [
+        "allometric_models",
+        "ndvi_biomass_regression"
+      ],
+      "dependencies": [
+        "torch",
+        "rasterio",
+        "numpy",
+        "scikit-learn"
+      ],
+      "resource_requirements": {
+        "gpu": true,
+        "min_memory_mb": 2048
+      },
+      "known_limitations": [
+        "Biomass estimation from optical imagery has high uncertainty",
+        "Allometric models are region-specific",
+        "LiDAR data recommended for calibration but not always available"
+      ],
+      "notes": "Planned — will combine spectral analysis with Prithvi features and allometric models for biomass estimation.",
+      "verification_note": "Architecture and schemas defined; pending specialist model deployment."
+    },
+    {
+      "id": "ocean_sea_surface_temperature",
+      "domain": "oceans",
+      "subdomain": "physical_oceanography",
+      "name": "Sea Surface Temperature Analysis",
+      "description": "Analyze sea surface temperature (SST) patterns, anomalies, and trends from satellite and in-situ ocean data. Supports ENSO monitoring, marine heatwave detection, and climate analysis.",
+      "status": "implemented",
+      "required_inputs": [
+        "sst_data",
+        "ocean_temperature_records"
+      ],
+      "supported_data_sources": [
+        "copernicus_marine",
+        "nasa_podaac",
+        "noaa_ncei"
+      ],
+      "models": [],
+      "algorithms": [
+        "anomaly_detection",
+        "trend_analysis",
+        "spatial_statistics",
+        "climatology_comparison"
+      ],
+      "dependencies": [
+        "xarray",
+        "numpy",
+        "scipy",
+        "cartopy"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 1024
+      },
+      "known_limitations": [
+        "Statistical analysis only — no ML-based prediction",
+        "Cloud cover affects satellite SST retrievals",
+        "In-situ data may have sparse spatial coverage"
+      ],
+      "notes": "Algorithm-based statistical analysis of SST data. Includes climatology computation, anomaly detection, and trend fitting.",
+      "verification_note": "Mathematically verified algorithm implemented and tested."
+    },
+    {
+      "id": "ocean_salinity_analysis",
+      "domain": "oceans",
+      "subdomain": "physical_oceanography",
+      "name": "Salinity Analysis",
+      "description": "Analyze ocean salinity patterns from satellite and in-situ data (Argo floats, ship-based measurements). Supports water mass identification and freshwater flux estimation.",
+      "status": "implemented",
+      "required_inputs": [
+        "salinity_data",
+        "argo_profiles"
+      ],
+      "supported_data_sources": [
+        "copernicus_marine",
+        "argo_floats",
+        "nasa_podaac"
+      ],
+      "models": [],
+      "algorithms": [
+        "profile_analysis",
+        "water_mass_classification",
+        "spatial_interpolation"
+      ],
+      "dependencies": [
+        "xarray",
+        "numpy",
+        "scipy"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 512
+      },
+      "known_limitations": [
+        "Satellite salinity measurements have lower resolution than SST",
+        "In-situ coverage is sparse in some ocean basins",
+        "Coastal salinity measurements affected by land contamination"
+      ],
+      "notes": "Statistical analysis of salinity data from Argo floats and satellite retrievals.",
+      "verification_note": "Mathematically verified algorithm implemented and tested."
+    },
+    {
+      "id": "ocean_current_analysis",
+      "domain": "oceans",
+      "subdomain": "physical_oceanography",
+      "name": "Ocean Current Analysis",
+      "description": "Analyze ocean current patterns from altimetry-derived geostrophic currents, drifter data, and model outputs. Includes current velocity, eddy detection, and transport calculations.",
+      "status": "experimental",
+      "required_inputs": [
+        "altimetry_data",
+        "current_velocity_data"
+      ],
+      "supported_data_sources": [
+        "copernicus_marine",
+        "nasa_podaac"
+      ],
+      "models": [],
+      "algorithms": [
+        "geostrophic_current_calculation",
+        "eddy_detection",
+        "volume_transport",
+        "streamline_analysis"
+      ],
+      "dependencies": [
+        "xarray",
+        "numpy",
+        "scipy",
+        "cartopy"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 1024
+      },
+      "known_limitations": [
+        "Geostrophic currents do not capture Ekman or ageostrophic components",
+        "Altimetry-derived currents are surface-only",
+        "Temporal resolution limited by satellite revisit time"
+      ],
+      "notes": "Algorithm-based analysis of ocean circulation patterns from satellite altimetry and model data.",
+      "verification_note": "Algorithmic heuristic implementation available; pending specialist satellite/sensor head integration."
+    },
+    {
+      "id": "ocean_sea_level_analysis",
+      "domain": "oceans",
+      "subdomain": "physical_oceanography",
+      "name": "Sea Level Analysis",
+      "description": "Analyze sea level variations and trends from satellite altimetry and tide gauge data. Supports sea level rise monitoring, tidal analysis, and storm surge estimation.",
+      "status": "experimental",
+      "required_inputs": [
+        "altimetry_data",
+        "tide_gauge_data"
+      ],
+      "supported_data_sources": [
+        "copernicus_marine",
+        "nasa_podaac",
+        "noaa_ncei"
+      ],
+      "models": [],
+      "algorithms": [
+        "trend_analysis",
+        "tidal_harmonic_analysis",
+        "sea_level_budget",
+        "regional_sea_level_change"
+      ],
+      "dependencies": [
+        "xarray",
+        "numpy",
+        "scipy",
+        "statsmodels"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 512
+      },
+      "known_limitations": [
+        "Altimetry accuracy limited near coastlines",
+        "Tide gauge records may have gaps and datum issues",
+        "Vertical land motion corrections needed for absolute sea level"
+      ],
+      "notes": "Statistical analysis of sea level data from satellite altimetry and tide gauges.",
+      "verification_note": "Algorithmic heuristic implementation available; pending specialist satellite/sensor head integration."
+    },
+    {
+      "id": "ocean_chlorophyll_analysis",
+      "domain": "oceans",
+      "subdomain": "biogeochemistry",
+      "name": "Chlorophyll Analysis",
+      "description": "Analyze ocean chlorophyll-a concentrations from satellite ocean color data. Supports phytoplankton bloom detection, primary productivity estimation, and marine ecosystem monitoring.",
+      "status": "experimental",
+      "required_inputs": [
+        "ocean_color_data",
+        "chlorophyll_products"
+      ],
+      "supported_data_sources": [
+        "copernicus_marine",
+        "nasa_podaac"
+      ],
+      "models": [],
+      "algorithms": [
+        "bloom_detection",
+        "chlorophyll_anomaly",
+        "phenology_analysis",
+        "trend_analysis"
+      ],
+      "dependencies": [
+        "xarray",
+        "numpy",
+        "scipy"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 512
+      },
+      "known_limitations": [
+        "Satellite-derived chlorophyll affected by cloud cover",
+        "Algorithms may overestimate in turbid coastal waters",
+        "Limited depth penetration — surface values only"
+      ],
+      "notes": "Algorithm-based analysis of satellite ocean color products for chlorophyll monitoring.",
+      "verification_note": "Algorithmic heuristic implementation available; pending specialist satellite/sensor head integration."
+    },
+    {
+      "id": "ocean_marine_ecosystem_analysis",
+      "domain": "oceans",
+      "subdomain": "biogeochemistry",
+      "name": "Marine Ecosystem Analysis",
+      "description": "Comprehensive marine ecosystem analysis integrating SST, chlorophyll, salinity, and current data to assess ecosystem health, biodiversity patterns, and habitat suitability.",
+      "status": "planned",
+      "required_inputs": [
+        "sst_data",
+        "chlorophyll_data",
+        "salinity_data",
+        "current_data"
+      ],
+      "supported_data_sources": [
+        "copernicus_marine",
+        "nasa_podaac",
+        "argo_floats"
+      ],
+      "models": [],
+      "algorithms": [
+        "multi_variable_integration",
+        "habitat_suitability_modeling",
+        "ecosystem_indicator_computation"
+      ],
+      "dependencies": [
+        "xarray",
+        "numpy",
+        "scipy",
+        "scikit-learn"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 2048
+      },
+      "known_limitations": [
+        "Requires integration of multiple data sources with different resolutions",
+        "Ecosystem models are simplified representations",
+        "Limited validation data for open ocean ecosystems"
+      ],
+      "notes": "Planned — requires implementation of multi-variable integration pipeline for comprehensive ecosystem assessment.",
+      "verification_note": "Architecture and schemas defined; pending specialist model deployment."
+    },
+    {
+      "id": "ocean_wave_analysis",
+      "domain": "oceans",
+      "subdomain": "physical_oceanography",
+      "name": "Wave Analysis",
+      "description": "Analyze and forecast ocean wave conditions using the Aurora Wave model. Predicts significant wave height, wave period, and wave direction for maritime and coastal applications.",
+      "status": "planned",
+      "required_inputs": [
+        "wind_fields",
+        "wave_spectra",
+        "ocean_surface_state"
+      ],
+      "supported_data_sources": [
+        "copernicus_marine",
+        "ecmwf_cds"
+      ],
+      "models": [
+        "aurora-wave"
+      ],
+      "algorithms": [
+        "spectral_wave_analysis"
+      ],
+      "dependencies": [
+        "torch",
+        "microsoft-aurora",
+        "xarray",
+        "numpy"
+      ],
+      "resource_requirements": {
+        "gpu": true,
+        "min_memory_mb": 4096
+      },
+      "known_limitations": [
+        "Requires Aurora Wave model — GPU-intensive",
+        "Performance may degrade in shallow/coastal waters",
+        "Needs wind forcing data as input"
+      ],
+      "notes": "Planned — needs Aurora Wave model integration for AI-based wave forecasting.",
+      "verification_note": "Architecture and schemas defined; pending specialist model deployment."
+    },
+    {
+      "id": "atmos_temperature_analysis",
+      "domain": "atmosphere",
+      "subdomain": "meteorology",
+      "name": "Temperature Analysis",
+      "description": "Analyze atmospheric temperature patterns, anomalies, and vertical profiles from reanalysis and observational data. Supports heat wave detection, lapse rate analysis, and thermal structure assessment.",
+      "status": "implemented",
+      "required_inputs": [
+        "temperature_data",
+        "pressure_level_data"
+      ],
+      "supported_data_sources": [
+        "ecmwf_cds",
+        "noaa_weather",
+        "nasa_gistemp"
+      ],
+      "models": [],
+      "algorithms": [
+        "anomaly_detection",
+        "vertical_profile_analysis",
+        "heat_wave_detection",
+        "trend_analysis"
+      ],
+      "dependencies": [
+        "xarray",
+        "numpy",
+        "scipy",
+        "metpy"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 512
+      },
+      "known_limitations": [
+        "Reanalysis data has model biases",
+        "Station-based analysis limited by network density",
+        "Urban heat island effects may not be resolved"
+      ],
+      "notes": "Algorithm-based statistical analysis of atmospheric temperature data.",
+      "verification_note": "Mathematically verified algorithm implemented and tested."
+    },
+    {
+      "id": "atmos_precipitation_analysis",
+      "domain": "atmosphere",
+      "subdomain": "meteorology",
+      "name": "Precipitation Analysis",
+      "description": "Analyze precipitation patterns, intensity, and frequency from satellite and gauge-based data. Supports drought monitoring, extreme rainfall analysis, and water resource assessment.",
+      "status": "implemented",
+      "required_inputs": [
+        "precipitation_data"
+      ],
+      "supported_data_sources": [
+        "noaa_weather",
+        "ecmwf_cds",
+        "imd"
+      ],
+      "models": [],
+      "algorithms": [
+        "intensity_analysis",
+        "frequency_analysis",
+        "return_period_estimation",
+        "spatial_interpolation",
+        "spi_computation"
+      ],
+      "dependencies": [
+        "xarray",
+        "numpy",
+        "scipy",
+        "statsmodels"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 512
+      },
+      "known_limitations": [
+        "Satellite precipitation estimates have biases over complex terrain",
+        "Gauge data has spatial coverage limitations",
+        "Sub-daily precipitation analysis requires high-frequency data"
+      ],
+      "notes": "Algorithm-based statistical analysis of precipitation data. Includes SPI drought index computation.",
+      "verification_note": "Mathematically verified algorithm implemented and tested."
+    },
+    {
+      "id": "atmos_wind_analysis",
+      "domain": "atmosphere",
+      "subdomain": "meteorology",
+      "name": "Wind Analysis",
+      "description": "Analyze wind speed, direction, and patterns from reanalysis and observational data. Supports wind resource assessment, storm analysis, and atmospheric circulation studies.",
+      "status": "implemented",
+      "required_inputs": [
+        "wind_data",
+        "u_v_components"
+      ],
+      "supported_data_sources": [
+        "ecmwf_cds",
+        "noaa_weather"
+      ],
+      "models": [],
+      "algorithms": [
+        "wind_rose_analysis",
+        "wind_speed_statistics",
+        "gust_analysis",
+        "vertical_wind_shear"
+      ],
+      "dependencies": [
+        "xarray",
+        "numpy",
+        "scipy",
+        "windrose"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 512
+      },
+      "known_limitations": [
+        "Reanalysis wind fields may underestimate extreme gusts",
+        "Surface wind affected by unresolved terrain features",
+        "Turbulence not captured in gridded products"
+      ],
+      "notes": "Algorithm-based statistical analysis of wind data from reanalysis and observations.",
+      "verification_note": "Mathematically verified algorithm implemented and tested."
+    },
+    {
+      "id": "atmos_atmospheric_composition",
+      "domain": "atmosphere",
+      "subdomain": "atmospheric_chemistry",
+      "name": "Atmospheric Composition Analysis",
+      "description": "Analyze atmospheric trace gas concentrations (CO2, CH4, O3, NO2, SO2) and aerosol properties from satellite and ground-based measurements.",
+      "status": "experimental",
+      "required_inputs": [
+        "trace_gas_data",
+        "aerosol_data"
+      ],
+      "supported_data_sources": [
+        "copernicus_dataspace",
+        "noaa_weather"
+      ],
+      "models": [],
+      "algorithms": [
+        "column_density_analysis",
+        "trend_analysis",
+        "source_attribution",
+        "air_quality_index"
+      ],
+      "dependencies": [
+        "xarray",
+        "numpy",
+        "scipy"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 512
+      },
+      "known_limitations": [
+        "Satellite retrievals are column-integrated values",
+        "Cloud contamination affects retrieval quality",
+        "Vertical profile information limited from satellite-only data"
+      ],
+      "notes": "Algorithm-based analysis of atmospheric composition from satellite products (e.g., Sentinel-5P TROPOMI).",
+      "verification_note": "Algorithmic heuristic implementation available; pending specialist satellite/sensor head integration."
+    },
+    {
+      "id": "atmos_aerosol_cloud_analysis",
+      "domain": "atmosphere",
+      "subdomain": "atmospheric_physics",
+      "name": "Aerosol and Cloud Analysis",
+      "description": "Analyze aerosol optical depth, cloud properties (cover, type, height), and aerosol-cloud interactions from satellite remote sensing data.",
+      "status": "planned",
+      "required_inputs": [
+        "aerosol_data",
+        "cloud_data",
+        "satellite_imagery"
+      ],
+      "supported_data_sources": [
+        "copernicus_dataspace",
+        "nasa_earthdata"
+      ],
+      "models": [],
+      "algorithms": [
+        "aod_retrieval",
+        "cloud_classification",
+        "cloud_top_height_estimation"
+      ],
+      "dependencies": [
+        "xarray",
+        "numpy",
+        "scipy",
+        "rasterio"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 1024
+      },
+      "known_limitations": [
+        "Aerosol-cloud separation is challenging in satellite retrievals",
+        "Thin cirrus may be undetected",
+        "Requires multi-angle or multi-spectral observations for robust retrievals"
+      ],
+      "notes": "Planned — requires implementation of aerosol and cloud retrieval algorithms from satellite Level-1 data.",
+      "verification_note": "Architecture and schemas defined; pending specialist model deployment."
+    },
+    {
+      "id": "atmos_cyclone_analysis",
+      "domain": "atmosphere",
+      "subdomain": "meteorology",
+      "name": "Cyclone Analysis",
+      "description": "Analyze tropical and extratropical cyclone characteristics including track, intensity, and structure from reanalysis and observational data.",
+      "status": "planned",
+      "required_inputs": [
+        "pressure_data",
+        "wind_data",
+        "satellite_imagery"
+      ],
+      "supported_data_sources": [
+        "noaa_weather",
+        "ecmwf_cds"
+      ],
+      "models": [],
+      "algorithms": [
+        "cyclone_tracking",
+        "intensity_estimation",
+        "wind_radii_analysis"
+      ],
+      "dependencies": [
+        "xarray",
+        "numpy",
+        "scipy",
+        "cartopy"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 1024
+      },
+      "known_limitations": [
+        "Cyclone tracking algorithms depend on resolution of input data",
+        "Intensity estimation has large uncertainty for weak systems",
+        "Historical best-track data has known biases"
+      ],
+      "notes": "Planned — requires implementation of cyclone tracking and analysis algorithms.",
+      "verification_note": "Architecture and schemas defined; pending specialist model deployment."
+    },
+    {
+      "id": "atmos_weather_forecasting",
+      "domain": "atmosphere",
+      "subdomain": "meteorology",
+      "name": "Weather Forecasting",
+      "description": "AI-based weather forecasting using the Microsoft Aurora foundation model. Produces multi-day forecasts of atmospheric state variables (temperature, wind, pressure, humidity).",
+      "status": "planned",
+      "required_inputs": [
+        "atmospheric_initial_conditions",
+        "era5_analysis_fields"
+      ],
+      "supported_data_sources": [
+        "ecmwf_cds",
+        "noaa_weather"
+      ],
+      "models": [
+        "microsoft-aurora"
+      ],
+      "algorithms": [],
+      "dependencies": [
+        "torch",
+        "microsoft-aurora",
+        "xarray",
+        "numpy"
+      ],
+      "resource_requirements": {
+        "gpu": true,
+        "min_memory_mb": 8192
+      },
+      "known_limitations": [
+        "Requires significant GPU memory (8+ GB)",
+        "Forecast skill degrades beyond 10 days",
+        "Requires ERA5-compatible initial conditions",
+        "Does not replace operational NWP — for research and analysis only"
+      ],
+      "notes": "Planned — needs Aurora model integration. Very GPU-intensive. Not a replacement for operational weather forecasting services.",
+      "verification_note": "Architecture and schemas defined; pending specialist model deployment."
+    },
+    {
+      "id": "solid_earth_earthquake_detection",
+      "domain": "solid_earth",
+      "subdomain": "seismology",
+      "name": "Earthquake Detection",
+      "description": "Automated earthquake detection from continuous seismic waveforms using the EQTransformer deep learning model via SeisBench. Simultaneously detects events and picks P/S phases.",
+      "status": "planned",
+      "required_inputs": [
+        "seismic_waveforms"
+      ],
+      "supported_data_sources": [
+        "usgs_earthquake",
+        "earthscope_fdsn"
+      ],
+      "models": [
+        "eqtransformer"
+      ],
+      "algorithms": [
+        "sta_lta_detection"
+      ],
+      "dependencies": [
+        "torch",
+        "seisbench",
+        "obspy",
+        "numpy"
+      ],
+      "resource_requirements": {
+        "gpu": true,
+        "min_memory_mb": 512
+      },
+      "known_limitations": [
+        "Requires EQTransformer model via SeisBench",
+        "May produce false positives in noisy environments",
+        "Performance varies by tectonic region and station network"
+      ],
+      "notes": "Planned — needs EQTransformer model integration via SeisBench framework.",
+      "verification_note": "Architecture and schemas defined; pending specialist model deployment."
+    },
+    {
+      "id": "solid_earth_seismic_phase_picking",
+      "domain": "solid_earth",
+      "subdomain": "seismology",
+      "name": "Seismic Phase Picking",
+      "description": "Automated identification and precise timing of seismic wave phase arrivals (P-waves and S-waves) using the PhaseNet deep learning model via SeisBench.",
+      "status": "planned",
+      "required_inputs": [
+        "seismic_waveforms"
+      ],
+      "supported_data_sources": [
+        "earthscope_fdsn"
+      ],
+      "models": [
+        "phasenet"
+      ],
+      "algorithms": [],
+      "dependencies": [
+        "torch",
+        "seisbench",
+        "obspy",
+        "numpy"
+      ],
+      "resource_requirements": {
+        "gpu": true,
+        "min_memory_mb": 512
+      },
+      "known_limitations": [
+        "Requires PhaseNet model via SeisBench",
+        "Optimized for local/regional earthquakes",
+        "Performance depends on signal-to-noise ratio"
+      ],
+      "notes": "Planned — needs PhaseNet model integration via SeisBench framework.",
+      "verification_note": "Architecture and schemas defined; pending specialist model deployment."
+    },
+    {
+      "id": "solid_earth_earthquake_magnitude_location",
+      "domain": "solid_earth",
+      "subdomain": "seismology",
+      "name": "Earthquake Magnitude and Location",
+      "description": "Compute earthquake magnitude estimates and hypocenter locations from phase arrival data using standard seismological algorithms (Wadati, grid search, iterative least squares).",
+      "status": "implemented",
+      "required_inputs": [
+        "phase_arrival_data",
+        "station_metadata",
+        "velocity_model"
+      ],
+      "supported_data_sources": [
+        "usgs_earthquake",
+        "earthscope_fdsn"
+      ],
+      "models": [],
+      "algorithms": [
+        "wadati_method",
+        "grid_search_location",
+        "iterative_least_squares",
+        "magnitude_calculation"
+      ],
+      "dependencies": [
+        "obspy",
+        "numpy",
+        "scipy"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 256
+      },
+      "known_limitations": [
+        "Location accuracy depends on velocity model quality",
+        "Minimum 4 stations required for location",
+        "Local magnitude (ML) may saturate for large earthquakes"
+      ],
+      "notes": "Algorithm-based implementation using standard seismological methods for earthquake location and magnitude.",
+      "verification_note": "Mathematically verified algorithm implemented and tested."
+    },
+    {
+      "id": "solid_earth_aftershock_analysis",
+      "domain": "solid_earth",
+      "subdomain": "seismology",
+      "name": "Aftershock Analysis",
+      "description": "Statistical analysis of aftershock sequences including Omori-Utsu law fitting, Bath's law, and Gutenberg-Richter b-value estimation for seismic hazard assessment.",
+      "status": "implemented",
+      "required_inputs": [
+        "earthquake_catalog",
+        "mainshock_parameters"
+      ],
+      "supported_data_sources": [
+        "usgs_earthquake"
+      ],
+      "models": [],
+      "algorithms": [
+        "omori_utsu_law",
+        "gutenberg_richter_bvalue",
+        "baths_law",
+        "etas_model"
+      ],
+      "dependencies": [
+        "numpy",
+        "scipy",
+        "statsmodels"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 256
+      },
+      "known_limitations": [
+        "Requires complete earthquake catalog (magnitude of completeness must be assessed)",
+        "Statistical models assume stationarity in seismicity",
+        "Short sequences may have poorly constrained parameters"
+      ],
+      "notes": "Statistical analysis of aftershock sequences using established seismological models.",
+      "verification_note": "Mathematically verified algorithm implemented and tested."
+    },
+    {
+      "id": "solid_earth_volcano_monitoring",
+      "domain": "solid_earth",
+      "subdomain": "volcanology",
+      "name": "Volcano Monitoring",
+      "description": "Monitor volcanic activity through seismic swarm analysis, thermal anomaly detection, and ground deformation from InSAR. Integrates multiple monitoring parameters for unrest assessment.",
+      "status": "planned",
+      "required_inputs": [
+        "seismic_data",
+        "thermal_imagery",
+        "insar_data"
+      ],
+      "supported_data_sources": [
+        "usgs_earthquake",
+        "copernicus_dataspace",
+        "earthscope_fdsn"
+      ],
+      "models": [],
+      "algorithms": [
+        "seismic_swarm_detection",
+        "thermal_anomaly_detection",
+        "deformation_analysis"
+      ],
+      "dependencies": [
+        "obspy",
+        "rasterio",
+        "numpy",
+        "scipy"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 1024
+      },
+      "known_limitations": [
+        "Requires multi-parameter integration for reliable unrest assessment",
+        "InSAR temporal resolution limited by satellite revisit",
+        "Seismic monitoring depends on local network coverage"
+      ],
+      "notes": "Planned — requires integration of multi-parameter volcanic monitoring pipeline.",
+      "verification_note": "Architecture and schemas defined; pending specialist model deployment."
+    },
+    {
+      "id": "solid_earth_ground_deformation",
+      "domain": "solid_earth",
+      "subdomain": "geodesy",
+      "name": "Ground Deformation Analysis",
+      "description": "Measure and analyze ground surface deformation from InSAR (Interferometric Synthetic Aperture Radar) data. Supports tectonic, volcanic, and subsidence monitoring applications.",
+      "status": "planned",
+      "required_inputs": [
+        "sar_imagery",
+        "insar_interferograms"
+      ],
+      "supported_data_sources": [
+        "copernicus_dataspace",
+        "nasa_earthdata"
+      ],
+      "models": [],
+      "algorithms": [
+        "insar_processing",
+        "phase_unwrapping",
+        "time_series_insar"
+      ],
+      "dependencies": [
+        "rasterio",
+        "numpy",
+        "scipy"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 2048
+      },
+      "known_limitations": [
+        "Requires SAR image pairs with suitable baseline",
+        "Atmospheric delays introduce significant errors",
+        "Phase unwrapping can fail in areas of rapid deformation",
+        "Vegetation causes temporal decorrelation"
+      ],
+      "notes": "Planned — requires InSAR processing pipeline implementation. Consider integration with ISCE or SNAP for operational use.",
+      "verification_note": "Architecture and schemas defined; pending specialist model deployment."
+    },
+    {
+      "id": "climate_trends",
+      "domain": "climate",
+      "subdomain": "climate_analysis",
+      "name": "Climate Trends Analysis",
+      "description": "Analyze long-term climate trends in temperature, precipitation, and other climate variables. Includes trend significance testing, breakpoint detection, and rate-of-change computation.",
+      "status": "implemented",
+      "required_inputs": [
+        "climate_time_series",
+        "temperature_records",
+        "precipitation_records"
+      ],
+      "supported_data_sources": [
+        "era5",
+        "nasa_gistemp",
+        "noaa_ncei"
+      ],
+      "models": [],
+      "algorithms": [
+        "mann_kendall_trend_test",
+        "sen_slope_estimator",
+        "linear_regression",
+        "moving_average",
+        "breakpoint_detection"
+      ],
+      "dependencies": [
+        "numpy",
+        "scipy",
+        "statsmodels",
+        "xarray"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 512
+      },
+      "known_limitations": [
+        "Trend detection requires sufficiently long time series (30+ years recommended)",
+        "Inhomogeneities in observational records may create spurious trends",
+        "Statistical significance depends on autocorrelation structure"
+      ],
+      "notes": "Algorithm-based statistical analysis of long-term climate data using established climatological methods.",
+      "verification_note": "Mathematically verified algorithm implemented and tested."
+    },
+    {
+      "id": "climate_anomalies",
+      "domain": "climate",
+      "subdomain": "climate_analysis",
+      "name": "Climate Anomaly Analysis",
+      "description": "Compute and analyze climate anomalies relative to baseline climatology periods. Supports identification of unusual climate conditions and teleconnection patterns.",
+      "status": "implemented",
+      "required_inputs": [
+        "climate_data",
+        "baseline_climatology"
+      ],
+      "supported_data_sources": [
+        "era5",
+        "nasa_gistemp",
+        "noaa_ncei"
+      ],
+      "models": [],
+      "algorithms": [
+        "anomaly_computation",
+        "standardized_anomaly",
+        "percentile_analysis",
+        "composite_analysis"
+      ],
+      "dependencies": [
+        "numpy",
+        "scipy",
+        "xarray"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 512
+      },
+      "known_limitations": [
+        "Anomaly magnitude depends on choice of baseline period",
+        "Standardization assumes normality which may not hold for all variables",
+        "Missing data in reference period affects climatology quality"
+      ],
+      "notes": "Algorithm-based analysis of climate anomalies. Standard baseline periods: 1961-1990, 1981-2010, 1991-2020.",
+      "verification_note": "Mathematically verified algorithm implemented and tested."
+    },
+    {
+      "id": "climate_drought_analysis",
+      "domain": "climate",
+      "subdomain": "climate_extremes",
+      "name": "Drought Analysis",
+      "description": "Analyze drought conditions using multiple drought indices (SPI, SPEI, PDSI, soil moisture anomalies). Supports drought monitoring, severity classification, and impact assessment.",
+      "status": "experimental",
+      "required_inputs": [
+        "precipitation_data",
+        "temperature_data",
+        "evapotranspiration_data"
+      ],
+      "supported_data_sources": [
+        "era5",
+        "noaa_ncei",
+        "nasa_gistemp"
+      ],
+      "models": [],
+      "algorithms": [
+        "spi_computation",
+        "spei_computation",
+        "pdsi_computation",
+        "soil_moisture_anomaly"
+      ],
+      "dependencies": [
+        "numpy",
+        "scipy",
+        "xarray"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 512
+      },
+      "known_limitations": [
+        "Different drought indices capture different aspects of drought",
+        "SPI requires long precipitation records for robust fitting",
+        "Agricultural drought assessment requires soil/crop data not included"
+      ],
+      "notes": "Algorithm-based drought analysis using standardized drought indices.",
+      "verification_note": "Algorithmic heuristic implementation available; pending specialist satellite/sensor head integration."
+    },
+    {
+      "id": "climate_greenhouse_gas_analysis",
+      "domain": "climate",
+      "subdomain": "climate_forcing",
+      "name": "Greenhouse Gas Analysis",
+      "description": "Analyze greenhouse gas (CO2, CH4, N2O) concentrations, trends, and emissions estimates from atmospheric monitoring data and satellite retrievals.",
+      "status": "implemented",
+      "required_inputs": [
+        "ghg_concentration_data",
+        "emissions_data"
+      ],
+      "supported_data_sources": [
+        "noaa_ncei",
+        "copernicus_dataspace"
+      ],
+      "models": [],
+      "algorithms": [
+        "trend_analysis",
+        "seasonal_decomposition",
+        "growth_rate_computation",
+        "source_attribution"
+      ],
+      "dependencies": [
+        "numpy",
+        "scipy",
+        "xarray",
+        "statsmodels"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 512
+      },
+      "known_limitations": [
+        "Ground-based networks have limited spatial coverage",
+        "Satellite retrievals have averaging kernel sensitivities",
+        "Emissions inversion requires atmospheric transport modeling"
+      ],
+      "notes": "Algorithm-based analysis of greenhouse gas data from monitoring networks and satellite products.",
+      "verification_note": "Mathematically verified algorithm implemented and tested."
+    },
+    {
+      "id": "climate_environmental_changes",
+      "domain": "climate",
+      "subdomain": "climate_impacts",
+      "name": "Environmental Changes Analysis",
+      "description": "Analyze climate-driven environmental changes including ice sheet mass loss, permafrost thaw, vegetation phenology shifts, and ecosystem transitions.",
+      "status": "planned",
+      "required_inputs": [
+        "cryosphere_data",
+        "vegetation_data",
+        "climate_data"
+      ],
+      "supported_data_sources": [
+        "era5",
+        "nasa_earthdata",
+        "copernicus_dataspace"
+      ],
+      "models": [
+        "prithvi-wxc"
+      ],
+      "algorithms": [
+        "ice_mass_balance",
+        "phenology_analysis",
+        "ecosystem_shift_detection"
+      ],
+      "dependencies": [
+        "xarray",
+        "numpy",
+        "scipy",
+        "rasterio"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 1024
+      },
+      "known_limitations": [
+        "Multi-variable integration requires careful data harmonization",
+        "Attribution of environmental changes to climate drivers is complex",
+        "Long time series needed for robust trend detection"
+      ],
+      "notes": "Planned — requires implementation of integrated environmental change analysis pipeline.",
+      "verification_note": "Architecture and schemas defined; pending specialist model deployment."
+    },
+    {
+      "id": "climate_extreme_event_analysis",
+      "domain": "climate",
+      "subdomain": "climate_extremes",
+      "name": "Extreme Event Analysis",
+      "description": "Analyze climate extreme events (heatwaves, cold snaps, extreme precipitation, storms) using extreme value theory and return period estimation.",
+      "status": "planned",
+      "required_inputs": [
+        "daily_climate_data",
+        "sub_daily_data"
+      ],
+      "supported_data_sources": [
+        "era5",
+        "noaa_ncei"
+      ],
+      "models": [
+        "prithvi-wxc"
+      ],
+      "algorithms": [
+        "extreme_value_theory",
+        "return_period_estimation",
+        "threshold_exceedance",
+        "compound_event_analysis"
+      ],
+      "dependencies": [
+        "numpy",
+        "scipy",
+        "xarray",
+        "statsmodels"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 1024
+      },
+      "known_limitations": [
+        "Extreme value distributions require long records for reliable fitting",
+        "Non-stationarity of climate extremes complicates analysis",
+        "Compound events are difficult to characterize statistically"
+      ],
+      "notes": "Planned — requires implementation of extreme value analysis framework with non-stationary extensions.",
+      "verification_note": "Architecture and schemas defined; pending specialist model deployment."
+    },
+    {
+      "id": "helio_sunspot_detection",
+      "domain": "heliophysics",
+      "subdomain": "solar_surface",
+      "name": "Sunspot Detection",
+      "description": "Automated detection and characterization of sunspots from Solar Dynamics Observatory (SDO) HMI continuum imagery using the Surya foundation model.",
+      "status": "planned",
+      "required_inputs": [
+        "sdo_hmi_imagery",
+        "solar_continuum_images"
+      ],
+      "supported_data_sources": [
+        "nasa_sdo"
+      ],
+      "models": [
+        "surya"
+      ],
+      "algorithms": [
+        "intensity_thresholding"
+      ],
+      "dependencies": [
+        "torch",
+        "sunpy",
+        "astropy",
+        "numpy"
+      ],
+      "resource_requirements": {
+        "gpu": true,
+        "min_memory_mb": 2048
+      },
+      "known_limitations": [
+        "Requires Surya model for AI-based detection",
+        "Small pores may be difficult to distinguish from granulation",
+        "Limb darkening corrections required for accurate detection near solar limb"
+      ],
+      "notes": "Planned — needs Surya model integration. Intensity-based thresholding available as a simple fallback.",
+      "verification_note": "Architecture and schemas defined; pending specialist model deployment."
+    },
+    {
+      "id": "helio_solar_active_regions",
+      "domain": "heliophysics",
+      "subdomain": "solar_surface",
+      "name": "Solar Active Region Analysis",
+      "description": "Identify, track, and characterize solar active regions including magnetic complexity classification (McIntosh, Mount Wilson) and evolution analysis.",
+      "status": "planned",
+      "required_inputs": [
+        "sdo_hmi_magnetograms",
+        "sdo_aia_imagery"
+      ],
+      "supported_data_sources": [
+        "nasa_sdo",
+        "noaa_swpc"
+      ],
+      "models": [
+        "surya"
+      ],
+      "algorithms": [
+        "magnetic_polarity_analysis",
+        "region_tracking"
+      ],
+      "dependencies": [
+        "torch",
+        "sunpy",
+        "astropy",
+        "numpy"
+      ],
+      "resource_requirements": {
+        "gpu": true,
+        "min_memory_mb": 2048
+      },
+      "known_limitations": [
+        "Magnetic classification requires high-quality magnetogram data",
+        "Region tracking affected by solar rotation",
+        "Far-side active regions cannot be directly observed"
+      ],
+      "notes": "Planned — requires Surya model and HMI magnetogram processing pipeline.",
+      "verification_note": "Architecture and schemas defined; pending specialist model deployment."
+    },
+    {
+      "id": "helio_solar_flare_analysis",
+      "domain": "heliophysics",
+      "subdomain": "solar_activity",
+      "name": "Solar Flare Analysis",
+      "description": "Statistical analysis of solar flare activity including GOES X-ray flux classification, flare frequency distributions, and waiting time analysis for space weather assessment.",
+      "status": "experimental",
+      "required_inputs": [
+        "goes_xray_flux",
+        "flare_catalog"
+      ],
+      "supported_data_sources": [
+        "noaa_swpc",
+        "nasa_sdo"
+      ],
+      "models": [],
+      "algorithms": [
+        "flare_classification",
+        "frequency_distribution",
+        "waiting_time_analysis",
+        "flare_association"
+      ],
+      "dependencies": [
+        "sunpy",
+        "astropy",
+        "numpy",
+        "scipy"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 256
+      },
+      "known_limitations": [
+        "Statistical analysis only — no flare prediction capability",
+        "GOES classification is based on peak X-ray flux only",
+        "Flare-CME association is probabilistic"
+      ],
+      "notes": "Statistical analysis of solar flare catalogs and GOES X-ray data. Does not include flare prediction.",
+      "verification_note": "Algorithmic heuristic implementation available; pending specialist satellite/sensor head integration."
+    },
+    {
+      "id": "helio_cme_analysis",
+      "domain": "heliophysics",
+      "subdomain": "solar_activity",
+      "name": "Coronal Mass Ejection Analysis",
+      "description": "Analyze coronal mass ejection (CME) properties including speed, angular width, mass, and Earth-directed probability from coronagraph imagery and catalogs.",
+      "status": "planned",
+      "required_inputs": [
+        "coronagraph_imagery",
+        "cme_catalog"
+      ],
+      "supported_data_sources": [
+        "nasa_sdo",
+        "noaa_swpc"
+      ],
+      "models": [],
+      "algorithms": [
+        "cme_detection",
+        "speed_estimation",
+        "arrival_time_prediction"
+      ],
+      "dependencies": [
+        "sunpy",
+        "astropy",
+        "numpy",
+        "scipy"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 512
+      },
+      "known_limitations": [
+        "Coronagraph images are 2D projections of 3D structures",
+        "Halo CMEs are difficult to characterize",
+        "Arrival time predictions have large uncertainty (±12 hours)"
+      ],
+      "notes": "Planned — requires coronagraph image analysis and CME catalog integration.",
+      "verification_note": "Architecture and schemas defined; pending specialist model deployment."
+    },
+    {
+      "id": "helio_solar_wind_analysis",
+      "domain": "heliophysics",
+      "subdomain": "interplanetary",
+      "name": "Solar Wind Analysis",
+      "description": "Analyze solar wind parameters (speed, density, temperature, magnetic field) from in-situ spacecraft measurements. Supports stream interaction region and solar wind sector analysis.",
+      "status": "experimental",
+      "required_inputs": [
+        "solar_wind_data",
+        "imf_data"
+      ],
+      "supported_data_sources": [
+        "noaa_swpc",
+        "nasa_sdo"
+      ],
+      "models": [],
+      "algorithms": [
+        "solar_wind_classification",
+        "stream_interaction_detection",
+        "sector_boundary_identification",
+        "statistical_analysis"
+      ],
+      "dependencies": [
+        "numpy",
+        "scipy",
+        "astropy"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 256
+      },
+      "known_limitations": [
+        "In-situ measurements are single-point observations",
+        "Solar wind propagation from L1 to Earth introduces timing uncertainty",
+        "Data gaps during spacecraft maneuvers"
+      ],
+      "notes": "Statistical analysis of solar wind in-situ measurements from ACE, DSCOVR, and Wind spacecraft.",
+      "verification_note": "Algorithmic heuristic implementation available; pending specialist satellite/sensor head integration."
+    },
+    {
+      "id": "helio_geomagnetic_storm_analysis",
+      "domain": "heliophysics",
+      "subdomain": "geospace",
+      "name": "Geomagnetic Storm Analysis",
+      "description": "Analyze geomagnetic storm activity using geomagnetic indices (Dst, Kp, AE, SYM-H). Includes storm phase identification, intensity classification, and recovery time analysis.",
+      "status": "implemented",
+      "required_inputs": [
+        "geomagnetic_indices",
+        "solar_wind_data"
+      ],
+      "supported_data_sources": [
+        "noaa_swpc"
+      ],
+      "models": [],
+      "algorithms": [
+        "storm_phase_detection",
+        "intensity_classification",
+        "recovery_time_estimation",
+        "superposed_epoch_analysis"
+      ],
+      "dependencies": [
+        "numpy",
+        "scipy",
+        "astropy"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 256
+      },
+      "known_limitations": [
+        "Geomagnetic indices are derived quantities with inherent smoothing",
+        "Storm classification thresholds are somewhat arbitrary",
+        "Multi-step storms complicate phase identification"
+      ],
+      "notes": "Statistical analysis of geomagnetic storms using standard geomagnetic indices.",
+      "verification_note": "Mathematically verified algorithm implemented and tested."
+    },
+    {
+      "id": "planetary_lunar_surface_analysis",
+      "domain": "planetary",
+      "subdomain": "lunar_science",
+      "name": "Lunar Surface Analysis",
+      "description": "Analyze lunar surface properties including albedo, roughness, thermal inertia, and composition from orbital imagery and spectroscopy data.",
+      "status": "planned",
+      "required_inputs": [
+        "lunar_imagery",
+        "spectroscopy_data"
+      ],
+      "supported_data_sources": [
+        "nasa_pds",
+        "lunar_archives"
+      ],
+      "models": [
+        "lunar-crater-detection"
+      ],
+      "algorithms": [
+        "albedo_mapping",
+        "roughness_estimation",
+        "spectral_unmixing"
+      ],
+      "dependencies": [
+        "rasterio",
+        "numpy",
+        "scipy",
+        "astropy"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 1024
+      },
+      "known_limitations": [
+        "Requires calibrated orbital imagery",
+        "Spectral unmixing depends on endmember library quality",
+        "Photometric corrections needed for quantitative albedo"
+      ],
+      "notes": "Planned — requires lunar data pipeline and surface analysis algorithms.",
+      "verification_note": "Architecture and schemas defined; pending specialist model deployment."
+    },
+    {
+      "id": "planetary_crater_detection",
+      "domain": "planetary",
+      "subdomain": "surface_geology",
+      "name": "Crater Detection",
+      "description": "Automated detection and characterization of impact craters from orbital imagery using the NASA/IBM Lunar Foundation Model. Currently supports lunar crater detection only.",
+      "status": "planned",
+      "required_inputs": [
+        "orbital_imagery"
+      ],
+      "supported_data_sources": [
+        "nasa_pds",
+        "lunar_archives"
+      ],
+      "models": [
+        "lunar-crater-detection"
+      ],
+      "algorithms": [
+        "crater_rim_detection",
+        "diameter_estimation"
+      ],
+      "dependencies": [
+        "torch",
+        "rasterio",
+        "numpy"
+      ],
+      "resource_requirements": {
+        "gpu": true,
+        "min_memory_mb": 2048
+      },
+      "known_limitations": [
+        "Currently supports lunar imagery ONLY — no Mars support",
+        "May miss heavily degraded or overlapping craters",
+        "Performance varies with illumination angle and image resolution"
+      ],
+      "notes": "Planned — needs Lunar Foundation Model integration. Currently lunar-only; Mars crater detection requires a separate model.",
+      "verification_note": "Architecture and schemas defined; pending specialist model deployment."
+    },
+    {
+      "id": "planetary_terrain_elevation_analysis",
+      "domain": "planetary",
+      "subdomain": "topography",
+      "name": "Terrain Elevation Analysis",
+      "description": "Analyze planetary surface topography from digital elevation models (DEMs) including slope, aspect, hypsometry, roughness, and geomorphometric parameters.",
+      "status": "implemented",
+      "required_inputs": [
+        "digital_elevation_model"
+      ],
+      "supported_data_sources": [
+        "nasa_pds",
+        "lunar_archives",
+        "mars_archives"
+      ],
+      "models": [],
+      "algorithms": [
+        "slope_computation",
+        "aspect_computation",
+        "hypsometric_analysis",
+        "roughness_estimation",
+        "curvature_analysis"
+      ],
+      "dependencies": [
+        "rasterio",
+        "numpy",
+        "scipy"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 512
+      },
+      "known_limitations": [
+        "DEM resolution limits feature detection scale",
+        "Edge effects at DEM boundaries",
+        "Stereo-derived DEMs have varying accuracy depending on image geometry"
+      ],
+      "notes": "Algorithm-based terrain analysis applicable to any planetary body with DEM data.",
+      "verification_note": "Mathematically verified algorithm implemented and tested."
+    },
+    {
+      "id": "planetary_mineral_analysis",
+      "domain": "planetary",
+      "subdomain": "composition",
+      "name": "Mineral Analysis",
+      "description": "Analyze planetary surface mineral composition from hyperspectral imagery using spectral analysis, band ratios, and spectral unmixing techniques.",
+      "status": "planned",
+      "required_inputs": [
+        "hyperspectral_imagery",
+        "spectral_library"
+      ],
+      "supported_data_sources": [
+        "nasa_pds",
+        "lunar_archives",
+        "mars_archives"
+      ],
+      "models": [],
+      "algorithms": [
+        "spectral_unmixing",
+        "band_ratio_analysis",
+        "mineral_mapping"
+      ],
+      "dependencies": [
+        "numpy",
+        "scipy",
+        "spectral"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 1024
+      },
+      "known_limitations": [
+        "Spectral library coverage may not include all mineral species",
+        "Nonlinear mixing in particulate surfaces complicates unmixing",
+        "Atmospheric corrections needed for Mars data"
+      ],
+      "notes": "Planned — requires hyperspectral analysis pipeline and mineral spectral libraries.",
+      "verification_note": "Architecture and schemas defined; pending specialist model deployment."
+    },
+    {
+      "id": "planetary_surface_change_detection",
+      "domain": "planetary",
+      "subdomain": "monitoring",
+      "name": "Surface Change Detection",
+      "description": "Detect surface changes on planetary bodies from multi-temporal orbital imagery, including new impact craters, mass wasting events, and seasonal frost changes.",
+      "status": "planned",
+      "required_inputs": [
+        "temporal_image_pair",
+        "orbital_imagery"
+      ],
+      "supported_data_sources": [
+        "nasa_pds",
+        "lunar_archives",
+        "mars_archives"
+      ],
+      "models": [],
+      "algorithms": [
+        "image_differencing",
+        "change_vector_analysis",
+        "temporal_comparison"
+      ],
+      "dependencies": [
+        "rasterio",
+        "numpy",
+        "scipy",
+        "scikit-image"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 1024
+      },
+      "known_limitations": [
+        "Requires co-registered multi-temporal imagery",
+        "Illumination differences between observations complicate comparison",
+        "Small changes may be below detection threshold"
+      ],
+      "notes": "Planned — will adapt Earth observation change detection algorithms for planetary applications.",
+      "verification_note": "Architecture and schemas defined; pending specialist model deployment."
+    },
+    {
+      "id": "astro_galaxy_morphology",
+      "domain": "astronomy",
+      "subdomain": "extragalactic",
+      "name": "Galaxy Morphology Classification",
+      "description": "Automated galaxy morphological classification using the Zoobot ConvNeXt-Nano model. Classifies galaxies into morphological types and identifies features (spirals, bars, mergers, rings).",
+      "status": "planned",
+      "required_inputs": [
+        "galaxy_images",
+        "survey_cutouts"
+      ],
+      "supported_data_sources": [
+        "sdss",
+        "mast"
+      ],
+      "models": [
+        "zoobot-convnext-nano"
+      ],
+      "algorithms": [],
+      "dependencies": [
+        "torch",
+        "zoobot",
+        "astropy",
+        "numpy"
+      ],
+      "resource_requirements": {
+        "gpu": true,
+        "min_memory_mb": 1024
+      },
+      "known_limitations": [
+        "Requires Zoobot model integration",
+        "Trained on Galaxy Zoo data — biased toward bright resolved galaxies",
+        "Classification follows Galaxy Zoo decision tree taxonomy"
+      ],
+      "notes": "Planned — needs Zoobot model integration for automated morphological classification.",
+      "verification_note": "Architecture and schemas defined; pending specialist model deployment."
+    },
+    {
+      "id": "astro_stellar_classification",
+      "domain": "astronomy",
+      "subdomain": "stellar",
+      "name": "Stellar Classification",
+      "description": "Classify stars by spectral type using spectral analysis, photometric colors, and HR diagram placement. Supports MK spectral classification (OBAFGKM) and luminosity class determination.",
+      "status": "implemented",
+      "required_inputs": [
+        "stellar_spectra",
+        "photometric_data"
+      ],
+      "supported_data_sources": [
+        "mast",
+        "gaia_archive",
+        "sdss"
+      ],
+      "models": [],
+      "algorithms": [
+        "spectral_type_matching",
+        "photometric_classification",
+        "hr_diagram_analysis",
+        "color_magnitude_analysis"
+      ],
+      "dependencies": [
+        "astropy",
+        "specutils",
+        "numpy",
+        "scipy"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 512
+      },
+      "known_limitations": [
+        "Template matching accuracy depends on spectral library coverage",
+        "Photometric classification has degeneracies (reddening vs. intrinsic color)",
+        "Peculiar stars may not match standard templates"
+      ],
+      "notes": "Algorithm-based stellar classification using spectral template matching and photometric analysis.",
+      "verification_note": "Mathematically verified algorithm implemented and tested."
+    },
+    {
+      "id": "astro_spectral_analysis",
+      "domain": "astronomy",
+      "subdomain": "spectroscopy",
+      "name": "Spectral Analysis",
+      "description": "Analyze astronomical spectra including continuum fitting, emission/absorption line identification, redshift measurement, equivalent width computation, and spectral decomposition.",
+      "status": "implemented",
+      "required_inputs": [
+        "spectra"
+      ],
+      "supported_data_sources": [
+        "mast",
+        "sdss",
+        "gaia_archive"
+      ],
+      "models": [],
+      "algorithms": [
+        "continuum_fitting",
+        "line_identification",
+        "redshift_measurement",
+        "equivalent_width",
+        "gaussian_line_fitting"
+      ],
+      "dependencies": [
+        "astropy",
+        "specutils",
+        "numpy",
+        "scipy"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 256
+      },
+      "known_limitations": [
+        "Automated line identification may miss weak or blended lines",
+        "Continuum fitting is subjective in complex spectra",
+        "Low SNR spectra have larger measurement uncertainties"
+      ],
+      "notes": "Algorithm-based spectral analysis using astropy and specutils for general-purpose astronomical spectroscopy.",
+      "verification_note": "Mathematically verified algorithm implemented and tested."
+    },
+    {
+      "id": "astro_transient_detection",
+      "domain": "astronomy",
+      "subdomain": "time_domain",
+      "name": "Transient Detection",
+      "description": "Detect and characterize transient astronomical events (supernovae, novae, variable stars, GRBs) from time-series photometric data using statistical anomaly detection.",
+      "status": "experimental",
+      "required_inputs": [
+        "light_curves",
+        "photometric_time_series"
+      ],
+      "supported_data_sources": [
+        "mast",
+        "sdss"
+      ],
+      "models": [],
+      "algorithms": [
+        "sigma_clipping",
+        "change_point_detection",
+        "periodicity_analysis",
+        "template_matching"
+      ],
+      "dependencies": [
+        "astropy",
+        "numpy",
+        "scipy"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 256
+      },
+      "known_limitations": [
+        "Requires well-sampled light curves for reliable detection",
+        "Classification of transient type requires additional information",
+        "False positive rate depends on threshold selection"
+      ],
+      "notes": "Algorithm-based transient detection using statistical methods on photometric time series.",
+      "verification_note": "Algorithmic heuristic implementation available; pending specialist satellite/sensor head integration."
+    },
+    {
+      "id": "astro_exoplanet_transit",
+      "domain": "astronomy",
+      "subdomain": "exoplanets",
+      "name": "Exoplanet Transit Detection",
+      "description": "Detect and characterize exoplanet transits from photometric light curves using box-fitting least squares (BLS), transit model fitting, and phase-folding analysis.",
+      "status": "experimental",
+      "required_inputs": [
+        "light_curves",
+        "photometric_time_series"
+      ],
+      "supported_data_sources": [
+        "mast",
+        "nasa_exoplanet_archive"
+      ],
+      "models": [],
+      "algorithms": [
+        "bls_periodogram",
+        "transit_model_fitting",
+        "phase_folding",
+        "limb_darkening_correction"
+      ],
+      "dependencies": [
+        "astropy",
+        "numpy",
+        "scipy",
+        "lightkurve"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 512
+      },
+      "known_limitations": [
+        "Requires high-precision photometry (ppm-level for Earth-like planets)",
+        "Stellar variability can mimic or mask transit signals",
+        "Grazing transits may be difficult to distinguish from eclipsing binaries"
+      ],
+      "notes": "Algorithm-based exoplanet transit detection using BLS and transit model fitting.",
+      "verification_note": "Algorithmic heuristic implementation available; pending specialist satellite/sensor head integration."
+    },
+    {
+      "id": "astro_time_series_analysis",
+      "domain": "astronomy",
+      "subdomain": "general",
+      "name": "Time Series Analysis",
+      "description": "General-purpose astronomical time series analysis including period finding (Lomb-Scargle), variability characterization, power spectral density, and autocorrelation analysis.",
+      "status": "implemented",
+      "required_inputs": [
+        "time_series_data"
+      ],
+      "supported_data_sources": [
+        "mast",
+        "sdss",
+        "gaia_archive",
+        "nasa_exoplanet_archive"
+      ],
+      "models": [],
+      "algorithms": [
+        "lomb_scargle_periodogram",
+        "autocorrelation",
+        "structure_function",
+        "wavelet_analysis",
+        "phase_dispersion_minimization"
+      ],
+      "dependencies": [
+        "astropy",
+        "numpy",
+        "scipy"
+      ],
+      "resource_requirements": {
+        "gpu": false,
+        "min_memory_mb": 256
+      },
+      "known_limitations": [
+        "Lomb-Scargle assumes sinusoidal variability",
+        "Aliasing from irregular sampling can create spurious periods",
+        "Windowing effects may suppress real signals"
+      ],
+      "notes": "General-purpose time series analysis tools for astronomical applications. Handles irregularly sampled data.",
+      "verification_note": "Mathematically verified algorithm implemented and tested."
+    }
+  ]
+}

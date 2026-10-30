@@ -1,0 +1,653 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-10-30",
+  "datasets": [
+    {
+      "id": "copernicus_dataspace",
+      "name": "Copernicus Data Space Ecosystem",
+      "provider": "ESA/Copernicus",
+      "domain": [
+        "earth_observation"
+      ],
+      "description": "The Copernicus Data Space Ecosystem provides free and open access to Sentinel satellite data (Sentinel-1 SAR, Sentinel-2 optical, Sentinel-3 ocean/land, Sentinel-5P atmospheric). Supports discovery, visualization, and download of Earth observation data products.",
+      "base_url": "https://dataspace.copernicus.eu/",
+      "api_type": "REST/OData",
+      "auth_required": true,
+      "auth_method": "oauth2",
+      "credential_env_vars": [
+        "COPERNICUS_CLIENT_ID",
+        "COPERNICUS_CLIENT_SECRET"
+      ],
+      "data_formats": [
+        "GeoTIFF",
+        "NetCDF",
+        "SAFE",
+        "JP2"
+      ],
+      "spatial_coverage": "global",
+      "temporal_coverage": {
+        "start": "2014-present"
+      },
+      "update_frequency": "near-real-time",
+      "connector_status": "implemented",
+      "access_status": "requires_registration",
+      "notes": "Free registration required. OAuth2 credentials (client_id/client_secret) must be set as environment variables. Connector implemented for Sentinel-2 L2A data discovery and download."
+    },
+    {
+      "id": "nasa_earthdata",
+      "name": "NASA Earthdata",
+      "provider": "NASA",
+      "domain": [
+        "earth_observation",
+        "climate"
+      ],
+      "description": "NASA's Earthdata platform providing access to NASA's Earth science data collections including MODIS, VIIRS, Landsat (via USGS), ICESat-2, GRACE, and more. Supports CMR (Common Metadata Repository) search and data download.",
+      "base_url": "https://earthdata.nasa.gov/",
+      "api_type": "REST/CMR",
+      "auth_required": true,
+      "auth_method": "earthdata_login",
+      "credential_env_vars": [
+        "EARTHDATA_USERNAME",
+        "EARTHDATA_PASSWORD"
+      ],
+      "data_formats": [
+        "HDF5",
+        "HDF4",
+        "GeoTIFF",
+        "NetCDF"
+      ],
+      "spatial_coverage": "global",
+      "temporal_coverage": {
+        "start": "1970-present"
+      },
+      "update_frequency": "varies_by_product",
+      "connector_status": "implemented",
+      "access_status": "requires_registration",
+      "notes": "Free NASA Earthdata account required. Connector implemented for CMR search and data access. Large archive spanning decades of Earth observation data."
+    },
+    {
+      "id": "usgs_landsat",
+      "name": "USGS Landsat Collection",
+      "provider": "USGS",
+      "domain": [
+        "earth_observation"
+      ],
+      "description": "USGS-hosted Landsat data archive providing the longest continuous satellite record of Earth's surface (Landsat 1-9). Includes surface reflectance, surface temperature, and analysis-ready data products.",
+      "base_url": "https://earthexplorer.usgs.gov/",
+      "api_type": "REST/M2M",
+      "auth_required": true,
+      "auth_method": "usgs_eros_login",
+      "credential_env_vars": [
+        "USGS_USERNAME",
+        "USGS_PASSWORD"
+      ],
+      "data_formats": [
+        "GeoTIFF",
+        "HDF5"
+      ],
+      "spatial_coverage": "global",
+      "temporal_coverage": {
+        "start": "1972-present"
+      },
+      "update_frequency": "16-day revisit per satellite",
+      "connector_status": "planned",
+      "access_status": "requires_registration",
+      "notes": "Planned — requires USGS EROS account and M2M API integration. The longest-running satellite land observation program."
+    },
+    {
+      "id": "copernicus_marine",
+      "name": "Copernicus Marine Service (CMEMS)",
+      "provider": "Mercator Ocean International",
+      "domain": [
+        "oceans"
+      ],
+      "description": "Copernicus Marine Environment Monitoring Service providing ocean analysis, forecasts, and reanalysis products. Includes sea surface temperature, salinity, currents, sea level, chlorophyll, and biogeochemical variables.",
+      "base_url": "https://marine.copernicus.eu/",
+      "api_type": "REST/MOTU",
+      "auth_required": true,
+      "auth_method": "copernicus_marine_login",
+      "credential_env_vars": [
+        "CMEMS_USERNAME",
+        "CMEMS_PASSWORD"
+      ],
+      "data_formats": [
+        "NetCDF"
+      ],
+      "spatial_coverage": "global",
+      "temporal_coverage": {
+        "start": "1993-present"
+      },
+      "update_frequency": "daily",
+      "connector_status": "planned",
+      "access_status": "requires_registration",
+      "notes": "Planned — requires Copernicus Marine account. Comprehensive ocean data service with analysis, forecast, and reanalysis products."
+    },
+    {
+      "id": "nasa_podaac",
+      "name": "NASA PO.DAAC",
+      "provider": "NASA/JPL",
+      "domain": [
+        "oceans"
+      ],
+      "description": "NASA Physical Oceanography Distributed Active Archive Center. Provides ocean-related satellite data including sea surface temperature, sea surface height, ocean winds, and salinity from missions like Jason, GRACE, Aquarius, and SWOT.",
+      "base_url": "https://podaac.jpl.nasa.gov/",
+      "api_type": "REST/CMR",
+      "auth_required": true,
+      "auth_method": "earthdata_login",
+      "credential_env_vars": [
+        "EARTHDATA_USERNAME",
+        "EARTHDATA_PASSWORD"
+      ],
+      "data_formats": [
+        "NetCDF",
+        "HDF5"
+      ],
+      "spatial_coverage": "global_ocean",
+      "temporal_coverage": {
+        "start": "1992-present"
+      },
+      "update_frequency": "varies_by_product",
+      "connector_status": "planned",
+      "access_status": "requires_registration",
+      "notes": "Planned — uses NASA Earthdata login. Specializes in physical oceanography satellite data products."
+    },
+    {
+      "id": "argo_floats",
+      "name": "Argo Float Network",
+      "provider": "Argo Program",
+      "domain": [
+        "oceans"
+      ],
+      "description": "Global array of ~4000 autonomous profiling floats measuring temperature, salinity, and increasingly biogeochemical parameters in the upper 2000m of the ocean. Provides real-time and delayed-mode quality-controlled data.",
+      "base_url": "https://argo.ucsd.edu/",
+      "api_type": "REST/FTP",
+      "auth_required": false,
+      "auth_method": "none",
+      "credential_env_vars": [],
+      "data_formats": [
+        "NetCDF"
+      ],
+      "spatial_coverage": "global_ocean",
+      "temporal_coverage": {
+        "start": "2000-present"
+      },
+      "update_frequency": "near-real-time",
+      "connector_status": "implemented",
+      "access_status": "public",
+      "notes": "Publicly accessible — no authentication required. Global ocean temperature and salinity profiling network. Real-time data available within 24 hours."
+    },
+    {
+      "id": "ecmwf_cds",
+      "name": "ECMWF Climate Data Store",
+      "provider": "ECMWF",
+      "domain": [
+        "atmosphere",
+        "climate"
+      ],
+      "description": "European Centre for Medium-Range Weather Forecasts Climate Data Store. Provides access to ERA5 reanalysis, seasonal forecasts, climate projections, and satellite-derived climate data records.",
+      "base_url": "https://cds.climate.copernicus.eu/",
+      "api_type": "REST/CDS-API",
+      "auth_required": true,
+      "auth_method": "api_key",
+      "credential_env_vars": [
+        "CDS_API_KEY"
+      ],
+      "data_formats": [
+        "GRIB",
+        "NetCDF"
+      ],
+      "spatial_coverage": "global",
+      "temporal_coverage": {
+        "start": "1940-present"
+      },
+      "update_frequency": "monthly",
+      "connector_status": "planned",
+      "access_status": "requires_registration",
+      "notes": "Planned — requires CDS API key. Primary source for ERA5 reanalysis data. Registration is free but API key must be configured."
+    },
+    {
+      "id": "noaa_weather",
+      "name": "NOAA Weather Services",
+      "provider": "NOAA",
+      "domain": [
+        "atmosphere"
+      ],
+      "description": "NOAA weather data services providing current conditions, forecasts, alerts, and historical weather observations. Includes the Weather API, METAR/TAF reports, and climate normals.",
+      "base_url": "https://api.weather.gov/",
+      "api_type": "REST",
+      "auth_required": false,
+      "auth_method": "none",
+      "credential_env_vars": [],
+      "data_formats": [
+        "JSON",
+        "GeoJSON"
+      ],
+      "spatial_coverage": "united_states",
+      "temporal_coverage": {
+        "start": "varies"
+      },
+      "update_frequency": "hourly",
+      "connector_status": "implemented",
+      "access_status": "public",
+      "notes": "Publicly accessible — no authentication required. Primarily covers US territory. For global data, use ECMWF CDS or other international services."
+    },
+    {
+      "id": "imd",
+      "name": "India Meteorological Department",
+      "provider": "IMD/Government of India",
+      "domain": [
+        "atmosphere"
+      ],
+      "description": "India Meteorological Department data services providing weather observations, forecasts, and climate data for the Indian subcontinent. Includes monsoon monitoring and tropical cyclone data.",
+      "base_url": "https://www.imd.gov.in/",
+      "api_type": "varies",
+      "auth_required": true,
+      "auth_method": "institutional",
+      "credential_env_vars": [
+        "IMD_API_KEY"
+      ],
+      "data_formats": [
+        "CSV",
+        "NetCDF",
+        "GrADS"
+      ],
+      "spatial_coverage": "india_subcontinent",
+      "temporal_coverage": {
+        "start": "1901-present"
+      },
+      "update_frequency": "daily",
+      "connector_status": "planned",
+      "access_status": "restricted",
+      "notes": "Planned — restricted access. Some datasets require institutional affiliation or data request process. High-resolution gridded rainfall data available for research."
+    },
+    {
+      "id": "usgs_earthquake",
+      "name": "USGS Earthquake Hazards Program",
+      "provider": "USGS",
+      "domain": [
+        "solid_earth"
+      ],
+      "description": "USGS Earthquake Hazards Program providing real-time earthquake notifications, searchable earthquake catalogs, hazard maps, and ShakeMap products. Global coverage with enhanced detail for US territory.",
+      "base_url": "https://earthquake.usgs.gov/fdsnws/event/1/",
+      "api_type": "REST/FDSN",
+      "auth_required": false,
+      "auth_method": "none",
+      "credential_env_vars": [],
+      "data_formats": [
+        "GeoJSON",
+        "CSV",
+        "QuakeML"
+      ],
+      "spatial_coverage": "global",
+      "temporal_coverage": {
+        "start": "1900-present"
+      },
+      "update_frequency": "near-real-time",
+      "connector_status": "implemented",
+      "access_status": "public",
+      "notes": "Publicly accessible — no authentication required. Comprehensive global earthquake catalog. FDSN event web service for programmatic access."
+    },
+    {
+      "id": "earthscope_fdsn",
+      "name": "EarthScope FDSN Services",
+      "provider": "EarthScope Consortium (formerly IRIS)",
+      "domain": [
+        "solid_earth"
+      ],
+      "description": "EarthScope (formerly IRIS) FDSN data services providing access to seismic waveform data, station metadata, and event catalogs from global seismographic networks. Supports FDSN web services standard.",
+      "base_url": "https://service.iris.edu/",
+      "api_type": "REST/FDSN",
+      "auth_required": false,
+      "auth_method": "none",
+      "credential_env_vars": [],
+      "data_formats": [
+        "MiniSEED",
+        "SAC",
+        "StationXML",
+        "QuakeML"
+      ],
+      "spatial_coverage": "global",
+      "temporal_coverage": {
+        "start": "1970-present"
+      },
+      "update_frequency": "near-real-time",
+      "connector_status": "implemented",
+      "access_status": "public",
+      "notes": "Publicly accessible — no authentication required. Primary source for seismic waveform data. Uses standard FDSN web services accessible via ObsPy."
+    },
+    {
+      "id": "era5",
+      "name": "ERA5 Reanalysis",
+      "provider": "ECMWF/Copernicus",
+      "domain": [
+        "climate",
+        "atmosphere"
+      ],
+      "description": "ERA5 is ECMWF's fifth-generation global atmospheric reanalysis providing hourly data on many atmospheric, land-surface, and sea-state parameters from 1940 to present at 0.25° resolution. The gold standard for atmospheric reanalysis.",
+      "base_url": "https://cds.climate.copernicus.eu/",
+      "api_type": "REST/CDS-API",
+      "auth_required": true,
+      "auth_method": "api_key",
+      "credential_env_vars": [
+        "CDS_API_KEY"
+      ],
+      "data_formats": [
+        "GRIB",
+        "NetCDF"
+      ],
+      "spatial_coverage": "global",
+      "temporal_coverage": {
+        "start": "1940-present"
+      },
+      "update_frequency": "monthly_with_5day_latency",
+      "connector_status": "planned",
+      "access_status": "requires_registration",
+      "notes": "Planned — requires CDS API key (same as ecmwf_cds). ERA5 is accessed through the Climate Data Store. Extremely large dataset — selective variable/region downloads recommended."
+    },
+    {
+      "id": "nasa_gistemp",
+      "name": "NASA GISS Surface Temperature Analysis (GISTEMP)",
+      "provider": "NASA GISS",
+      "domain": [
+        "climate"
+      ],
+      "description": "NASA Goddard Institute for Space Studies Surface Temperature Analysis providing global surface temperature change estimates from 1880 to present. Key dataset for global warming monitoring.",
+      "base_url": "https://data.giss.nasa.gov/gistemp/",
+      "api_type": "HTTP/direct_download",
+      "auth_required": false,
+      "auth_method": "none",
+      "credential_env_vars": [],
+      "data_formats": [
+        "CSV",
+        "NetCDF"
+      ],
+      "spatial_coverage": "global",
+      "temporal_coverage": {
+        "start": "1880-present"
+      },
+      "update_frequency": "monthly",
+      "connector_status": "implemented",
+      "access_status": "public",
+      "notes": "Publicly accessible — no authentication required. Direct download of global temperature anomaly data. Standard reference dataset for global temperature trends."
+    },
+    {
+      "id": "noaa_ncei",
+      "name": "NOAA National Centers for Environmental Information",
+      "provider": "NOAA",
+      "domain": [
+        "climate",
+        "oceans",
+        "atmosphere"
+      ],
+      "description": "NOAA NCEI (formerly NCDC) hosting one of the world's largest archives of atmospheric, coastal, geophysical, and oceanic data. Includes GHCN, OISST, IBTrACS, and many other climate datasets.",
+      "base_url": "https://www.ncei.noaa.gov/",
+      "api_type": "REST/CDO",
+      "auth_required": false,
+      "auth_method": "api_token",
+      "credential_env_vars": [
+        "NCEI_API_TOKEN"
+      ],
+      "data_formats": [
+        "CSV",
+        "NetCDF",
+        "JSON"
+      ],
+      "spatial_coverage": "global",
+      "temporal_coverage": {
+        "start": "1750-present"
+      },
+      "update_frequency": "varies_by_product",
+      "connector_status": "implemented",
+      "access_status": "public",
+      "notes": "Most data publicly accessible. Some API endpoints accept an optional token for higher rate limits. Comprehensive climate data archive."
+    },
+    {
+      "id": "nasa_sdo",
+      "name": "NASA Solar Dynamics Observatory (SDO)",
+      "provider": "NASA/GSFC",
+      "domain": [
+        "heliophysics"
+      ],
+      "description": "Solar Dynamics Observatory providing high-cadence, multi-wavelength solar imagery from AIA (Atmospheric Imaging Assembly) and magnetogram data from HMI (Helioseismic and Magnetic Imager). Primary data source for solar physics research.",
+      "base_url": "https://sdo.gsfc.nasa.gov/",
+      "api_type": "REST/JSOC",
+      "auth_required": false,
+      "auth_method": "email_registration",
+      "credential_env_vars": [
+        "JSOC_EMAIL"
+      ],
+      "data_formats": [
+        "FITS",
+        "JPEG",
+        "MP4"
+      ],
+      "spatial_coverage": "full_sun",
+      "temporal_coverage": {
+        "start": "2010-present"
+      },
+      "update_frequency": "near-real-time",
+      "connector_status": "implemented",
+      "access_status": "public",
+      "notes": "Publicly accessible via JSOC (Joint Science Operations Center). Email registration recommended for bulk data exports. Extremely high data volume (~1.5 TB/day)."
+    },
+    {
+      "id": "noaa_swpc",
+      "name": "NOAA Space Weather Prediction Center",
+      "provider": "NOAA",
+      "domain": [
+        "heliophysics"
+      ],
+      "description": "NOAA Space Weather Prediction Center providing real-time solar and geomagnetic data, space weather forecasts, alerts, and historical archives. Includes GOES X-ray flux, solar wind data, and geomagnetic indices.",
+      "base_url": "https://www.swpc.noaa.gov/",
+      "api_type": "REST/JSON",
+      "auth_required": false,
+      "auth_method": "none",
+      "credential_env_vars": [],
+      "data_formats": [
+        "JSON",
+        "CSV",
+        "text"
+      ],
+      "spatial_coverage": "sun_earth_system",
+      "temporal_coverage": {
+        "start": "1996-present"
+      },
+      "update_frequency": "real-time",
+      "connector_status": "implemented",
+      "access_status": "public",
+      "notes": "Publicly accessible — no authentication required. Real-time space weather data and forecasts. Primary source for operational space weather information."
+    },
+    {
+      "id": "nasa_pds",
+      "name": "NASA Planetary Data System",
+      "provider": "NASA",
+      "domain": [
+        "planetary"
+      ],
+      "description": "NASA's Planetary Data System archiving and distributing scientific data from planetary missions. Includes data from lunar, Mars, outer planets, and small body missions across multiple discipline nodes.",
+      "base_url": "https://pds.nasa.gov/",
+      "api_type": "REST/PDS4",
+      "auth_required": false,
+      "auth_method": "none",
+      "credential_env_vars": [],
+      "data_formats": [
+        "PDS3",
+        "PDS4",
+        "FITS",
+        "GeoTIFF"
+      ],
+      "spatial_coverage": "solar_system",
+      "temporal_coverage": {
+        "start": "1970-present"
+      },
+      "update_frequency": "varies_by_mission",
+      "connector_status": "planned",
+      "access_status": "public",
+      "notes": "Planned — publicly accessible but complex archive structure. Distributed across multiple discipline nodes (Geosciences, Atmospheres, Imaging, etc.)."
+    },
+    {
+      "id": "lunar_archives",
+      "name": "Lunar Data Archives",
+      "provider": "NASA/USGS",
+      "domain": [
+        "planetary"
+      ],
+      "description": "Collection of lunar data archives including LROC (Lunar Reconnaissance Orbiter Camera), Clementine, Apollo, and Chandrayaan mission data. Provides orbital imagery, topography, and compositional data for the Moon.",
+      "base_url": "https://www.lroc.asu.edu/",
+      "api_type": "REST/ODE",
+      "auth_required": false,
+      "auth_method": "none",
+      "credential_env_vars": [],
+      "data_formats": [
+        "FITS",
+        "GeoTIFF",
+        "PDS3",
+        "IMG"
+      ],
+      "spatial_coverage": "moon",
+      "temporal_coverage": {
+        "start": "1966-present"
+      },
+      "update_frequency": "mission_dependent",
+      "connector_status": "planned",
+      "access_status": "public",
+      "notes": "Planned — publicly accessible. Primary sources include LROC at ASU and PDS Geosciences Node. Data from multiple lunar missions spanning decades."
+    },
+    {
+      "id": "mars_archives",
+      "name": "Mars Data Archives",
+      "provider": "NASA/ESA",
+      "domain": [
+        "planetary"
+      ],
+      "description": "Collection of Mars data archives from orbital and surface missions including MRO (HiRISE, CTX, CRISM), Mars Express, Curiosity, and Perseverance. Provides imagery, spectroscopy, and atmospheric data.",
+      "base_url": "https://ode.rsl.wustl.edu/mars/",
+      "api_type": "REST/ODE",
+      "auth_required": false,
+      "auth_method": "none",
+      "credential_env_vars": [],
+      "data_formats": [
+        "FITS",
+        "GeoTIFF",
+        "PDS3",
+        "PDS4"
+      ],
+      "spatial_coverage": "mars",
+      "temporal_coverage": {
+        "start": "1997-present"
+      },
+      "update_frequency": "mission_dependent",
+      "connector_status": "planned",
+      "access_status": "public",
+      "notes": "Planned — publicly accessible. Accessed primarily through PDS Geosciences Node Orbital Data Explorer (ODE). Data from multiple Mars missions."
+    },
+    {
+      "id": "mast",
+      "name": "Mikulski Archive for Space Telescopes (MAST)",
+      "provider": "STScI",
+      "domain": [
+        "astronomy"
+      ],
+      "description": "NASA's primary archive for UV, optical, and near-infrared space-based astronomy data. Hosts data from Hubble, JWST, TESS, Kepler, GALEX, and other missions. Supports MAST Portal and astroquery programmatic access.",
+      "base_url": "https://mast.stsci.edu/",
+      "api_type": "REST/MAST-API",
+      "auth_required": false,
+      "auth_method": "none",
+      "credential_env_vars": [],
+      "data_formats": [
+        "FITS",
+        "CSV"
+      ],
+      "spatial_coverage": "full_sky",
+      "temporal_coverage": {
+        "start": "1978-present"
+      },
+      "update_frequency": "varies_by_mission",
+      "connector_status": "implemented",
+      "access_status": "public",
+      "notes": "Publicly accessible — no authentication required. Access via astroquery.mast or direct API. Primary archive for HST, JWST, TESS, and Kepler data."
+    },
+    {
+      "id": "gaia_archive",
+      "name": "ESA Gaia Archive",
+      "provider": "ESA",
+      "domain": [
+        "astronomy"
+      ],
+      "description": "ESA's Gaia mission archive providing the most comprehensive catalog of stellar positions, parallaxes, proper motions, and photometry for nearly 2 billion objects. Supports ADQL queries via TAP interface.",
+      "base_url": "https://gea.esac.esa.int/archive/",
+      "api_type": "TAP/ADQL",
+      "auth_required": false,
+      "auth_method": "none",
+      "credential_env_vars": [],
+      "data_formats": [
+        "VOTable",
+        "CSV",
+        "FITS"
+      ],
+      "spatial_coverage": "full_sky",
+      "temporal_coverage": {
+        "start": "2014-present"
+      },
+      "update_frequency": "major_data_releases",
+      "connector_status": "implemented",
+      "access_status": "public",
+      "notes": "Publicly accessible — no authentication required. Access via TAP/ADQL queries through astroquery.gaia. Current release: Gaia DR3 with ~1.8 billion sources."
+    },
+    {
+      "id": "sdss",
+      "name": "Sloan Digital Sky Survey (SDSS)",
+      "provider": "SDSS Collaboration",
+      "domain": [
+        "astronomy"
+      ],
+      "description": "Sloan Digital Sky Survey providing imaging and spectroscopic data for millions of galaxies, quasars, and stars. Multi-generation survey (SDSS-I through SDSS-V) with extensive photometric and spectroscopic catalogs.",
+      "base_url": "https://www.sdss.org/",
+      "api_type": "REST/CasJobs/SkyServer",
+      "auth_required": false,
+      "auth_method": "none",
+      "credential_env_vars": [],
+      "data_formats": [
+        "FITS",
+        "CSV",
+        "JSON"
+      ],
+      "spatial_coverage": "partial_sky",
+      "temporal_coverage": {
+        "start": "2000-present"
+      },
+      "update_frequency": "major_data_releases",
+      "connector_status": "implemented",
+      "access_status": "public",
+      "notes": "Publicly accessible — no authentication required. Access via SkyServer SQL queries, CasJobs, or astroquery.sdss. Covers ~35% of the sky with imaging, ~15% with spectroscopy."
+    },
+    {
+      "id": "nasa_exoplanet_archive",
+      "name": "NASA Exoplanet Archive",
+      "provider": "NASA/IPAC",
+      "domain": [
+        "astronomy"
+      ],
+      "description": "NASA's primary database for confirmed exoplanets, candidate planets, and stellar properties. Provides comprehensive exoplanet parameters, transit data, radial velocity data, and direct imaging results via TAP interface.",
+      "base_url": "https://exoplanetarchive.ipac.caltech.edu/",
+      "api_type": "TAP/REST",
+      "auth_required": false,
+      "auth_method": "none",
+      "credential_env_vars": [],
+      "data_formats": [
+        "CSV",
+        "VOTable",
+        "JSON",
+        "FITS"
+      ],
+      "spatial_coverage": "full_sky",
+      "temporal_coverage": {
+        "start": "1992-present"
+      },
+      "update_frequency": "weekly",
+      "connector_status": "implemented",
+      "access_status": "public",
+      "notes": "Publicly accessible — no authentication required. Access via TAP queries or astroquery. Comprehensive catalog of confirmed exoplanets with physical and orbital parameters."
+    }
+  ]
+}
