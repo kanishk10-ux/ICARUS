@@ -202,7 +202,7 @@ def get_capabilities() -> WorkerCapabilitiesResponse:
 @app.post("/unload-model", response_model=UnloadModelResponse)
 def unload_model(req: UnloadModelRequest) -> UnloadModelResponse:
     """Reclaims GPU VRAM by unloading specified model weights."""
-    if req.model_id == prithvi_adapter.MODEL_ID:
+    if req.model_id in [prithvi_adapter.MODEL_ID, prithvi_adapter.LEGACY_MODEL_ID]:
         success, msg, freed_mb = prithvi_adapter.unload_model()
         return UnloadModelResponse(
             worker_id=WORKER_ID,
@@ -308,6 +308,94 @@ def analyze(request: ResearchRequest) -> ResearchResponse:
         # Path B: Prithvi Foundation Latent Embeddings
         # ----------------------------------------------------
         elif any(k in task_name for k in ["prithvi", "embedding", "foundation", "feature_extraction"]):
+            # Ingestion & verification: Validate inputs first before loading heavy weights
+            input_tensor = params.get("tensor") or params.get("input_tensor") or params.get("temporal_frames")
+            raster_path = params.get("raster_path")
+
+            if input_tensor is not None:
+                try:
+                    repeat_single = bool(params.get("repeat_single_frame", False))
+                    raw_arr, prep_meta = EOPipeline.prepare_temporal_sequence(
+                        input_tensor,
+                        repeat_single_frame=repeat_single,
+                        crop_to_224=True,
+                    )
+                    data_source_info = {
+                        "type": "user_payload",
+                        "bands": prep_meta["bands"],
+                        "temporal_strategy": prep_meta["temporal_strategy"],
+                    }
+                    if "temporal_note" in prep_meta:
+                        data_source_info["note"] = prep_meta["temporal_note"]
+                except Exception as prep_err:
+                    duration = round(time.perf_counter() - start_t, 3)
+                    return ResearchResponse(
+                        request_id=request.request_id,
+                        task_id=task_id,
+                        worker_id=WORKER_ID,
+                        domain=DomainEnum.EARTH_OBSERVATION,
+                        status=TaskStatus.FAILED,
+                        results={"error": f"Temporal input sequence preparation failed: {str(prep_err)}"},
+                        execution_metadata=ExecutionMetadata(duration_seconds=duration, worker_id=WORKER_ID, device=DEVICE),
+                        error={"code": "INVALID_INPUT_SEQUENCE", "detail": str(prep_err)},
+                    )
+            elif raster_path and os.path.exists(raster_path):
+                try:
+                    raw_bands, meta = EOPipeline.read_bands_from_geotiff(raster_path)
+                    raw_arr, prep_meta = EOPipeline.prepare_temporal_sequence(
+                        raw_bands,
+                        repeat_single_frame=True,
+                        crop_to_224=True,
+                    )
+                    data_source_info = {
+                        "type": "geotiff_file",
+                        "path": raster_path,
+                        "crs": meta.get("crs"),
+                        "temporal_strategy": prep_meta["temporal_strategy"],
+                        "note": prep_meta.get("temporal_note"),
+                    }
+                except Exception as geo_err:
+                    duration = round(time.perf_counter() - start_t, 3)
+                    return ResearchResponse(
+                        request_id=request.request_id,
+                        task_id=task_id,
+                        worker_id=WORKER_ID,
+                        domain=DomainEnum.EARTH_OBSERVATION,
+                        status=TaskStatus.FAILED,
+                        results={"error": f"GeoTIFF ingestion failed: {str(geo_err)}"},
+                        execution_metadata=ExecutionMetadata(duration_seconds=duration, worker_id=WORKER_ID, device=DEVICE),
+                        error={"code": "GEOTIFF_READ_FAILED", "detail": str(geo_err)},
+                    )
+            elif request.allow_synthetic_demo:
+                np.random.seed(42)
+                raw_arr = np.random.uniform(500, 3000, (6, 4, 224, 224)).astype(np.float32)
+                data_source_info = {
+                    "type": "synthetic_demonstration",
+                    "note": "EXPLICIT DEMO DATA - not real satellite observation. Deterministic test array.",
+                }
+            else:
+                duration = round(time.perf_counter() - start_t, 3)
+                return ResearchResponse(
+                    request_id=request.request_id,
+                    task_id=task_id,
+                    worker_id=WORKER_ID,
+                    domain=DomainEnum.EARTH_OBSERVATION,
+                    status=TaskStatus.FAILED,
+                    results={
+                        "error": (
+                            "Missing required 6-band 4-frame raster payload ('tensor', 'temporal_frames', "
+                            "or 'raster_path') and allow_synthetic_demo is False. Prithvi inference requires "
+                            "verified observation data."
+                        )
+                    },
+                    limitations=["Real satellite raster not provided"],
+                    execution_metadata=ExecutionMetadata(duration_seconds=duration, worker_id=WORKER_ID, device=DEVICE),
+                    error={
+                        "code": "MISSING_INPUT_DATA",
+                        "detail": "Prithvi-EO-2.0-300M requires 6 spectral bands across 4 temporal frames.",
+                    },
+                )
+
             # Lazy load model if not yet loaded
             if prithvi_adapter.status != PrithviModelStatus.READY:
                 ok, msg = prithvi_adapter.load_model()
@@ -324,12 +412,25 @@ def analyze(request: ResearchRequest) -> ResearchResponse:
                         error={"code": "MODEL_LOAD_FAILED", "detail": msg},
                     )
 
-            # Build or extract 5D tensor: (Batch=1, Channels=6, Time=1, H=224, W=224)
-            np.random.seed(42)
-            dummy_hls = np.random.uniform(500, 3000, (1, 6, 1, 224, 224)).astype(np.float32)
-            norm_tensor = prithvi_adapter.normalize_hls_channels(dummy_hls)
+            # Normalize using official climatological constants and add batch dim
+            norm_tensor = prithvi_adapter.normalize_channels(raw_arr)
+            if norm_tensor.ndim == 4:
+                norm_tensor = np.expand_dims(norm_tensor, axis=0)
 
             res = prithvi_adapter.extract_features(norm_tensor)
+            if res.get("status") != "success":
+                duration = round(time.perf_counter() - start_t, 3)
+                return ResearchResponse(
+                    request_id=request.request_id,
+                    task_id=task_id,
+                    worker_id=WORKER_ID,
+                    domain=DomainEnum.EARTH_OBSERVATION,
+                    status=TaskStatus.FAILED,
+                    results={"error": res.get("error", "Feature extraction failed")},
+                    execution_metadata=ExecutionMetadata(duration_seconds=duration, worker_id=WORKER_ID, device=DEVICE),
+                    error={"code": "INFERENCE_FAILED", "detail": res.get("error")},
+                )
+
             duration = round(time.perf_counter() - start_t, 3)
 
             return ResearchResponse(
@@ -340,15 +441,28 @@ def analyze(request: ResearchRequest) -> ResearchResponse:
                 status=TaskStatus.SUCCESS,
                 model_used=prithvi_adapter.MODEL_ID,
                 model_version="2.0-300M",
+                dataset_used=request.dataset or "Sentinel-2/HLS Bands",
+                data_source=data_source_info,
                 results={
-                    "summary": f"Prithvi-EO-2.0-300M latent embeddings extracted ({res['patch_count']} patches x {res['hidden_dimension']} dims).",
+                    "summary": (
+                        f"Prithvi-EO-2.0-300M latent embeddings extracted "
+                        f"({res['patch_count']} spatio-temporal tokens + 1 CLS token x {res['hidden_dimension']} dims)."
+                    ),
                     "feature_metadata": res,
                 },
                 metrics=[
-                    TaskMetric(name="num_patches", value=res["patch_count"], unit="tokens"),
-                    TaskMetric(name="hidden_dimension", value=res["hidden_dimension"], unit="dimensions"),
+                    TaskMetric(name="num_tokens", value=res["token_shape"][1], unit="tokens"),
+                    TaskMetric(name="num_patch_tokens", value=res["patch_count"], unit="tokens"),
+                    TaskMetric(name="cls_mean", value=round(res["cls_token_summary"]["mean"], 6), unit="embedding"),
+                    TaskMetric(name="patch_mean", value=round(res["patch_embedding_summary"]["mean"], 6), unit="embedding"),
                 ],
-                provenance={"model": "IBM/NASA Prithvi-EO-2.0-300M", "patch_size": "16x16"},
+                provenance={
+                    "model": prithvi_adapter.MODEL_ID,
+                    "hf_revision": prithvi_adapter.HF_REVISION,
+                    "parameter_count": prithvi_adapter.PARAMETER_COUNT,
+                    "patch_size": "16x16",
+                    "temporal_frames": 4,
+                },
                 limitations=[res["scientific_note"]],
                 execution_metadata=ExecutionMetadata(duration_seconds=duration, worker_id=WORKER_ID, device=DEVICE),
             )

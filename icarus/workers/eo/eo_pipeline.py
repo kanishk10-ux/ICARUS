@@ -328,3 +328,134 @@ class EOPipeline:
         cropped = result[:, :orig_h, :orig_w]
         return cropped.squeeze(0) if channels == 1 else cropped
 
+    # ============================================================
+    # 4. Prithvi Spatio-Temporal Sequence Preparation
+    # ============================================================
+    OFFICIAL_PRITHVI_BANDS = ["B02", "B03", "B04", "B05", "B06", "B07"]
+
+    @staticmethod
+    def center_crop_or_pad_224(raster: np.ndarray) -> np.ndarray:
+        """Crops or pads spatial dimensions of raster (..., H, W) to exactly 224x224."""
+        h, w = raster.shape[-2], raster.shape[-1]
+        if h == 224 and w == 224:
+            return raster
+
+        if h >= 224 and w >= 224:
+            start_y = (h - 224) // 2
+            start_x = (w - 224) // 2
+            return raster[..., start_y : start_y + 224, start_x : start_x + 224]
+
+        pad_y = max(0, 224 - h)
+        pad_x = max(0, 224 - w)
+        pad_top = pad_y // 2
+        pad_bottom = pad_y - pad_top
+        pad_left = pad_x // 2
+        pad_right = pad_x - pad_left
+
+        pad_width = [(0, 0)] * (raster.ndim - 2) + [(pad_top, pad_bottom), (pad_left, pad_right)]
+        return np.pad(raster, pad_width, mode="reflect")
+
+    @classmethod
+    def prepare_temporal_sequence(
+        cls,
+        frames: Union[np.ndarray, List[np.ndarray]],
+        band_indices: Optional[List[int]] = None,
+        repeat_single_frame: bool = False,
+        crop_to_224: bool = True,
+    ) -> Tuple[np.ndarray, Dict[str, Any]]:
+        """Prepares a verified (Channels=6, Time=4, Height=224, Width=224) array for Prithvi-EO-2.0.
+
+        Strict validation:
+        - Channels: Exactly 6 spectral bands corresponding to ['B02', 'B03', 'B04', 'B05', 'B06', 'B07'].
+        - Temporal: Exactly 4 temporal frames.
+        - Finiteness: Rejects NaN or Inf values.
+        - Provenance: If single frame is duplicated across 4 frames, logs explicit warning.
+        """
+        provenance: Dict[str, Any] = {
+            "bands": cls.OFFICIAL_PRITHVI_BANDS,
+            "temporal_observations": 4,
+            "temporal_strategy": "multi_observation_sequence",
+        }
+
+        # Convert list of frames or 4D/5D array
+        if isinstance(frames, list):
+            frame_arrays = [np.asarray(f, dtype=np.float32) for f in frames]
+            num_frames = len(frame_arrays)
+            if num_frames == 1 and repeat_single_frame:
+                frame_arrays = frame_arrays * 4
+                provenance["temporal_strategy"] = "single_observation_repeated_4x"
+                provenance["temporal_note"] = (
+                    "Temporal sequence created by repeating single observation across 4 frames "
+                    "for foundational backbone compatibility. Caution: temporal dynamics are static."
+                )
+            elif num_frames != 4:
+                raise ValueError(
+                    f"Prithvi requires exactly 4 temporal frames (T=4). Provided list contains {num_frames} frames. "
+                    "Set repeat_single_frame=True to duplicate or supply 4 distinct temporal observations."
+                )
+            # Stack into (T=4, C, H, W)
+            stacked = np.stack(frame_arrays, axis=0)  # (4, C, H, W)
+            # Rearrange to (C, T, H, W)
+            raster_4d = np.transpose(stacked, (1, 0, 2, 3))
+        else:
+            arr = np.asarray(frames, dtype=np.float32)
+            if arr.ndim == 3:
+                # Shape (C, H, W) -> single frame
+                if not repeat_single_frame:
+                    raise ValueError(
+                        "Prithvi requires 4 temporal observations (T=4). Provided single 3D array (C, H, W). "
+                        "Set repeat_single_frame=True to duplicate or provide a 4D array."
+                    )
+                # Expand to (C, T=4, H, W)
+                raster_4d = np.repeat(np.expand_dims(arr, axis=1), 4, axis=1)
+                provenance["temporal_strategy"] = "single_observation_repeated_4x"
+                provenance["temporal_note"] = (
+                    "Temporal sequence created by repeating single observation across 4 frames "
+                    "for foundational backbone compatibility. Caution: temporal dynamics are static."
+                )
+            elif arr.ndim == 4:
+                # Shape could be (C, T, H, W) or (T, C, H, W)
+                if arr.shape[0] == 6 and arr.shape[1] == 4:
+                    raster_4d = arr
+                elif arr.shape[0] == 4 and arr.shape[1] == 6:
+                    raster_4d = np.transpose(arr, (1, 0, 2, 3))
+                elif arr.shape[0] == 6 and arr.shape[1] == 1 and repeat_single_frame:
+                    raster_4d = np.repeat(arr, 4, axis=1)
+                    provenance["temporal_strategy"] = "single_observation_repeated_4x"
+                else:
+                    raise ValueError(
+                        f"Unrecognized 4D shape {arr.shape}. Expected (C=6, T=4, H, W) or (T=4, C=6, H, W)."
+                    )
+            elif arr.ndim == 5:
+                # Batched: (B, C, T, H, W)
+                if arr.shape[1] == 6 and arr.shape[2] == 4:
+                    raster_4d = arr[0]
+                else:
+                    raise ValueError(f"Unrecognized 5D shape {arr.shape}. Expected (B, C=6, T=4, H, W).")
+            else:
+                raise ValueError(f"Unsupported array dimensions: {arr.ndim}D with shape {arr.shape}")
+
+        # Check finiteness
+        if not np.all(np.isfinite(raster_4d)):
+            raise ValueError("Input raster contains NaN or infinite values.")
+
+        # Filter bands if band_indices provided
+        if band_indices is not None:
+            if len(band_indices) != 6:
+                raise ValueError(f"Prithvi requires exactly 6 band indices, got {len(band_indices)}.")
+            raster_4d = raster_4d[band_indices, :, :, :]
+
+        # Verify channel count
+        if raster_4d.shape[0] != 6:
+            raise ValueError(
+                f"Prithvi requires exactly 6 spectral channels {cls.OFFICIAL_PRITHVI_BANDS}. Got {raster_4d.shape[0]}."
+            )
+
+        # Crop / pad to 224x224 if requested
+        if crop_to_224:
+            raster_4d = cls.center_crop_or_pad_224(raster_4d)
+
+        provenance["shape"] = list(raster_4d.shape)
+        return raster_4d, provenance
+
+
