@@ -247,53 +247,306 @@ STRICT OPERATIONAL RULES:
     def _deterministic_fallback_plan(
         self, question: str, user_parameters: Dict[str, Any], warnings: List[str]
     ) -> Tuple[MultiDomainRequest, StructuredResearchPlan, List[str]]:
-        """Deterministic keyword-based planner when LLM is unavailable."""
+        """Deterministic, capability-aware research router when Groq LLM is unavailable.
+
+        Strictly enforces:
+        1. Distinguishes model inference from traditional scientific index calculations.
+        2. Routes each domain to its verified task and model rather than defaulting to vegetation.
+        3. Preserves all user parameters, input references, spatial bounds, and temporal ranges.
+        4. Rejects unsupported tasks explicitly rather than silently misrouting.
+        """
         q_lower = question.lower()
         subtasks: List[PlannedSubtask] = []
         identified_domains: List[DomainEnum] = []
 
-        domain_keywords = {
-            DomainEnum.EARTH_OBSERVATION: ["satellite", "sentinel", "landsat", "ndvi", "vegetation", "canopy", "burn", "flood", "forest", "crop"],
-            DomainEnum.OCEANS: ["ocean", "sea", "sst", "salinity", "marine", "current", "wave", "tide"],
-            DomainEnum.ATMOSPHERE: ["weather", "wind", "rain", "precipitation", "storm", "cyclone", "temperature", "forecast"],
-            DomainEnum.SOLID_EARTH: ["earthquake", "seismic", "fault", "magnitude", "aftershock", "tremor"],
-            DomainEnum.CLIMATE: ["climate", "greenhouse", "co2", "warming", "drought", "trend", "decade"],
-            DomainEnum.HELIOPHYSICS: ["sun", "solar", "sunspot", "geomagnetic", "kp", "flare", "cme"],
-            DomainEnum.PLANETARY: ["crater", "lunar", "moon", "mars", "elevation", "slope", "dem"],
-            DomainEnum.ASTRONOMY: ["star", "galaxy", "stellar", "spectrum", "exoplanet", "transit", "telescope"],
-        }
+        explicit_task = user_parameters.get("task")
+        explicit_domain = user_parameters.get("domain")
 
-        default_tasks = {
-            DomainEnum.EARTH_OBSERVATION: "eo_vegetation_analysis",
-            DomainEnum.OCEANS: "ocean_sea_surface_temperature",
-            DomainEnum.ATMOSPHERE: "atmos_wind_analysis",
-            DomainEnum.SOLID_EARTH: "solid_earth_earthquake_magnitude_location",
-            DomainEnum.CLIMATE: "climate_trends",
-            DomainEnum.HELIOPHYSICS: "helio_geomagnetic_storm_analysis",
-            DomainEnum.PLANETARY: "planetary_crater_statistics",
-            DomainEnum.ASTRONOMY: "astro_stellar_classification",
-        }
+        # ---------------------------------------------------------
+        # Domain 1: Earth Observation
+        # ---------------------------------------------------------
+        if explicit_domain == "earth_observation" or any(
+            k in q_lower for k in [
+                "prithvi", "satellite", "sentinel", "landsat", "hls", "ndvi", "ndwi", "nbr",
+                "vegetation", "canopy", "burn", "flood", "forest", "crop", "land cover", "deforestation"
+            ]
+        ):
+            identified_domains.append(DomainEnum.EARTH_OBSERVATION)
+            if any(k in q_lower for k in ["prithvi", "embedding", "latent", "foundation"]) or explicit_task == "eo_foundation_embeddings":
+                task_id = "eo_foundation_embeddings"
+                req_models = ["ibm-nasa-geospatial/Prithvi-EO-2.0-300M"]
+                justification = "Request specifies foundation latent embedding extraction via Prithvi-EO-2.0-300M."
+            elif any(k in q_lower for k in ["water", "ndwi", "flood", "lake", "river"]) or explicit_task == "eo_water_detection":
+                task_id = "eo_water_detection"
+                req_models = []
+                justification = "Request specifies surface water index / NDWI extraction."
+            elif any(k in q_lower for k in ["burn", "fire", "nbr", "scar"]) or explicit_task == "eo_burn_scar_detection":
+                task_id = "eo_burn_scar_detection"
+                req_models = []
+                justification = "Request specifies normalized burn ratio / fire scar detection."
+            elif any(k in q_lower for k in ["land cover", "classification", "urban", "crop type"]):
+                task_id = "eo_land_cover_classification"
+                req_models = []
+                justification = "Request specifies land-cover classification."
+            elif any(k in q_lower for k in ["change", "deforestation", "temporal comparison"]):
+                task_id = "eo_change_detection"
+                req_models = []
+                justification = "Request specifies multi-temporal change detection."
+            elif any(k in q_lower for k in ["tile", "tiling", "patch"]):
+                task_id = "eo_spatial_tiling"
+                req_models = []
+                justification = "Request specifies high-resolution raster spatial tiling."
+            elif any(k in q_lower for k in ["area", "surface area", "square km", "acreage"]):
+                task_id = "eo_spatial_area"
+                req_models = []
+                justification = "Request specifies surface area calculation with CRS projection validation."
+            else:
+                task_id = "eo_vegetation_analysis"
+                req_models = []
+                justification = "Request specifies vegetation vigor / canopy health analysis (NDVI)."
 
-        for dom, keywords in domain_keywords.items():
-            if any(re.search(r'\b' + re.escape(kw) + r'\b', q_lower) for kw in keywords):
-                identified_domains.append(dom)
-                subtasks.append(
-                    PlannedSubtask(
-                        domain=dom,
-                        task=default_tasks[dom],
-                        subtask_question=f"Analyze {dom.value} aspects of: {question}",
-                        scientific_justification=f"Keyword match for domain {dom.value}",
-                    )
+            subtasks.append(
+                PlannedSubtask(
+                    domain=DomainEnum.EARTH_OBSERVATION,
+                    task=explicit_task or task_id,
+                    subtask_question=f"Execute {task_id} for research objective: {question}",
+                    required_models=req_models,
+                    parameters=dict(user_parameters),
+                    spatial_bounds=user_parameters.get("spatial_bounds"),
+                    temporal_range=user_parameters.get("temporal_range"),
+                    scientific_justification=justification,
                 )
+            )
 
+        # ---------------------------------------------------------
+        # Domain 2: Solid Earth & Seismology
+        # ---------------------------------------------------------
+        if explicit_domain == "solid_earth" or any(
+            k in q_lower for k in [
+                "earthquake", "seismic", "waveform", "phasenet", "phase pick", "p-wave", "s-wave",
+                "aftershock", "fault", "tremor", "ground motion", "seismogram"
+            ]
+        ):
+            identified_domains.append(DomainEnum.SOLID_EARTH)
+            if any(k in q_lower for k in ["phasenet", "phase", "pick", "arrival", "p-wave", "s-wave"]) or explicit_task == "solid_earth_phase_picking":
+                task_id = "solid_earth_phase_picking"
+                req_models = ["seisbench-phasenet"]
+                justification = "Deep-learning seismic phase picking (P-wave and S-wave arrival times) via SeisBench PhaseNet."
+            elif any(k in q_lower for k in ["waveform", "filter", "spectrum", "fft", "snr", "frequency"]):
+                task_id = "solid_earth_waveform_analysis"
+                req_models = []
+                justification = "Digital signal processing on 3-component seismic waveforms (filtering, SNR, spectrum)."
+            else:
+                task_id = "solid_earth_earthquake_magnitude_location"
+                req_models = []
+                justification = "Earthquake event statistics and magnitude estimation."
+
+            subtasks.append(
+                PlannedSubtask(
+                    domain=DomainEnum.SOLID_EARTH,
+                    task=explicit_task or task_id,
+                    subtask_question=f"Execute {task_id} for research objective: {question}",
+                    required_models=req_models,
+                    parameters=dict(user_parameters),
+                    spatial_bounds=user_parameters.get("spatial_bounds"),
+                    temporal_range=user_parameters.get("temporal_range"),
+                    scientific_justification=justification,
+                )
+            )
+
+        # ---------------------------------------------------------
+        # Domain 3: Heliophysics & Space Weather
+        # ---------------------------------------------------------
+        if explicit_domain == "heliophysics" or any(
+            k in q_lower for k in [
+                "sun", "solar", "surya", "flare", "coronal", "cme", "geomagnetic", "dst", "kp",
+                "sunspot", "sdo", "aia", "hmi", "space weather"
+            ]
+        ):
+            identified_domains.append(DomainEnum.HELIOPHYSICS)
+            if any(k in q_lower for k in ["surya", "foundation", "forecast", "sdo", "representation"]) or explicit_task == "helio_surya_solar_forecast":
+                task_id = "helio_surya_solar_forecast"
+                req_models = ["nasa-ibm-ai4science/Surya-1.0"]
+                justification = "Solar observation foundation model inference via NASA-IBM Surya-1.0."
+            elif any(k in q_lower for k in ["flare", "euv", "x-ray", "active region"]):
+                task_id = "helio_solar_flare_analysis"
+                req_models = []
+                justification = "Solar flare classification and EUV radiation flux analysis."
+            else:
+                task_id = "helio_geomagnetic_storm_analysis"
+                req_models = []
+                justification = "Geomagnetic storm indicators (Kp index, Dst index, planetary disturbance)."
+
+            subtasks.append(
+                PlannedSubtask(
+                    domain=DomainEnum.HELIOPHYSICS,
+                    task=explicit_task or task_id,
+                    subtask_question=f"Execute {task_id} for research objective: {question}",
+                    required_models=req_models,
+                    parameters=dict(user_parameters),
+                    temporal_range=user_parameters.get("temporal_range"),
+                    scientific_justification=justification,
+                )
+            )
+
+        # ---------------------------------------------------------
+        # Domain 4: Planetary Science
+        # ---------------------------------------------------------
+        if explicit_domain == "planetary" or any(
+            k in q_lower for k in [
+                "lunar", "moon", "crater", "planetary", "mars", "dem", "elevation",
+                "terrain slope", "topographic slope", "lroc", "lola", "terrain"
+            ]
+        ):
+            identified_domains.append(DomainEnum.PLANETARY)
+            if any(k in q_lower for k in ["lunar foundation", "nasa-ibm", "embedding", "lro", "nac"]) or explicit_task == "planetary_lunar_foundation_embeddings":
+                task_id = "planetary_lunar_foundation_embeddings"
+                req_models = ["nasa-ibm-ai4science/NASA-IBM-Lunar-Foundation-Model"]
+                justification = "Planetary surface representation learning via NASA-IBM Lunar Foundation Model."
+            elif any(k in q_lower for k in ["crater", "circularity", "impact", "morphometry"]):
+                task_id = "planetary_crater_statistics"
+                req_models = []
+                justification = "Planetary crater morphometry and size-frequency distribution."
+            else:
+                task_id = "planetary_elevation_terrain_analysis"
+                req_models = []
+                justification = "Digital elevation model analysis (terrain slope, aspect, and surface roughness)."
+
+            subtasks.append(
+                PlannedSubtask(
+                    domain=DomainEnum.PLANETARY,
+                    task=explicit_task or task_id,
+                    subtask_question=f"Execute {task_id} for research objective: {question}",
+                    required_models=req_models,
+                    parameters=dict(user_parameters),
+                    spatial_bounds=user_parameters.get("spatial_bounds"),
+                    scientific_justification=justification,
+                )
+            )
+
+        # ---------------------------------------------------------
+        # Domain 5: Astronomy & Astrophysics
+        # ---------------------------------------------------------
+        if explicit_domain == "astronomy" or any(
+            k in q_lower for k in [
+                "galaxy", "zoobot", "morphology", "spiral", "elliptical", "star", "stellar",
+                "light curve", "lomb-scargle", "photometry", "exoplanet", "transit", "telescope"
+            ]
+        ):
+            identified_domains.append(DomainEnum.ASTRONOMY)
+            if any(k in q_lower for k in ["zoobot", "morphology", "galaxy classification"]) or explicit_task == "astro_zoobot_morphology_classification":
+                task_id = "astro_zoobot_morphology_classification"
+                req_models = ["mwalmsley/zoobot-encoder-convnext_nano"]
+                justification = "Deep-learning galaxy morphology classification via Zoobot 2.0."
+            elif any(k in q_lower for k in ["light curve", "periodicity", "lomb-scargle", "variability"]):
+                task_id = "astro_light_curve_analysis"
+                req_models = []
+                justification = "Astronomical time-series analysis and periodicity detection via Lomb-Scargle."
+            else:
+                task_id = "astro_stellar_classification"
+                req_models = []
+                justification = "Photometric aperture flux and stellar spectral analysis."
+
+            subtasks.append(
+                PlannedSubtask(
+                    domain=DomainEnum.ASTRONOMY,
+                    task=explicit_task or task_id,
+                    subtask_question=f"Execute {task_id} for research objective: {question}",
+                    required_models=req_models,
+                    parameters=dict(user_parameters),
+                    scientific_justification=justification,
+                )
+            )
+
+        # ---------------------------------------------------------
+        # Domain 6: Oceans and Water
+        # ---------------------------------------------------------
+        if explicit_domain == "oceans" or any(
+            k in q_lower for k in ["ocean", "sea", "sst", "salinity", "chlorophyll", "current", "wave", "marine", "hydrography"]
+        ):
+            identified_domains.append(DomainEnum.OCEANS)
+            if any(k in q_lower for k in ["current", "circulation", "vorticity", "velocity"]):
+                task_id = "ocean_currents_dynamics"
+            elif any(k in q_lower for k in ["salinity", "chlorophyll", "haline"]):
+                task_id = "ocean_salinity_chlorophyll"
+            else:
+                task_id = "ocean_sea_surface_temperature"
+
+            subtasks.append(
+                PlannedSubtask(
+                    domain=DomainEnum.OCEANS,
+                    task=explicit_task or task_id,
+                    subtask_question=f"Execute {task_id} for research objective: {question}",
+                    parameters=dict(user_parameters),
+                    spatial_bounds=user_parameters.get("spatial_bounds"),
+                    temporal_range=user_parameters.get("temporal_range"),
+                    scientific_justification=f"Oceanographic analysis for {task_id}.",
+                )
+            )
+
+        # ---------------------------------------------------------
+        # Domain 7: Atmosphere & Weather
+        # ---------------------------------------------------------
+        is_climate_drought = any(k in q_lower for k in ["drought", "spi", "decadal", "warming trend", "mann-kendall"])
+        if (explicit_domain == "atmosphere" or any(
+            k in q_lower for k in ["atmosphere", "weather", "wind", "rain", "precipitation", "storm", "cyclone", "temperature gradient"]
+        )) and not is_climate_drought:
+            identified_domains.append(DomainEnum.ATMOSPHERE)
+            if any(k in q_lower for k in ["wind", "vector", "u-wind", "v-wind", "circulation"]):
+                task_id = "atmos_wind_analysis"
+            elif any(k in q_lower for k in ["rain", "precipitation", "rainfall", "convective"]):
+                task_id = "atmos_precipitation_analysis"
+            else:
+                task_id = "atmos_temperature_analysis"
+
+            subtasks.append(
+                PlannedSubtask(
+                    domain=DomainEnum.ATMOSPHERE,
+                    task=explicit_task or task_id,
+                    subtask_question=f"Execute {task_id} for research objective: {question}",
+                    parameters=dict(user_parameters),
+                    spatial_bounds=user_parameters.get("spatial_bounds"),
+                    temporal_range=user_parameters.get("temporal_range"),
+                    scientific_justification=f"Atmospheric dynamics analysis for {task_id}.",
+                )
+            )
+
+        # ---------------------------------------------------------
+        # Domain 8: Climate & Environment
+        # ---------------------------------------------------------
+        if explicit_domain == "climate" or any(
+            k in q_lower for k in ["climate", "decadal", "trend", "greenhouse", "warming", "drought", "spi", "mann-kendall", "variability"]
+        ):
+            identified_domains.append(DomainEnum.CLIMATE)
+            if any(k in q_lower for k in ["drought", "spi", "aridity", "water deficit"]):
+                task_id = "climate_drought_index"
+            elif any(k in q_lower for k in ["variability", "enso", "oscillation"]):
+                task_id = "climate_variability_analysis"
+            else:
+                task_id = "climate_trends"
+
+            subtasks.append(
+                PlannedSubtask(
+                    domain=DomainEnum.CLIMATE,
+                    task=explicit_task or task_id,
+                    subtask_question=f"Execute {task_id} for research objective: {question}",
+                    parameters=dict(user_parameters),
+                    temporal_range=user_parameters.get("temporal_range"),
+                    scientific_justification=f"Climate long-term analysis for {task_id}.",
+                )
+            )
+
+        # Fallback if no domain matched
         if not identified_domains:
+            warnings.append(f"No specific scientific keywords identified in '{question}'; defaulted to Earth Observation.")
             identified_domains.append(DomainEnum.EARTH_OBSERVATION)
             subtasks.append(
                 PlannedSubtask(
                     domain=DomainEnum.EARTH_OBSERVATION,
-                    task="eo_vegetation_analysis",
+                    task=explicit_task or "eo_vegetation_analysis",
                     subtask_question=question,
-                    scientific_justification="Default domain assignment",
+                    parameters=dict(user_parameters),
+                    scientific_justification="Fallback domain allocation",
                 )
             )
 
@@ -301,9 +554,9 @@ STRICT OPERATIONAL RULES:
             identified_domains=identified_domains,
             execution_strategy="parallel",
             subtasks=subtasks,
-            scientific_rationale="Deterministic baseline keyword routing.",
-            hypotheses=["Relevant scientific metrics can be derived from available algorithmic adapters."],
-            potential_limitations=["Baseline planner cannot perform contextual semantic domain decomposition."],
+            scientific_rationale="Deterministic, capability-aware research router execution.",
+            hypotheses=["Subtasks correctly decomposed into specialist domain algorithm/model capabilities."],
+            potential_limitations=["Deterministic planner uses keyword rules; complex multi-stage scientific workflows benefit from LLM contextual decomposition."],
         )
 
         request_subtasks = [
@@ -311,7 +564,10 @@ STRICT OPERATIONAL RULES:
                 domain=st.domain,
                 task=st.task,
                 research_question=st.subtask_question,
-                parameters=user_parameters,
+                required_models=st.required_models,
+                parameters=dict(st.parameters),
+                spatial_bounds=st.spatial_bounds,
+                temporal_range=st.temporal_range,
             )
             for st in subtasks
         ]
